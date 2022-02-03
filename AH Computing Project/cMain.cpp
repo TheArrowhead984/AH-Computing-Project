@@ -232,8 +232,8 @@ void cMain::runRandomQuery(std::string mediaType, bool random, int movieID)
                 movieTitle->SetLabel(wxString(row[1]) + " (" + row[3] + ")"); //Set the text to the name of the movie
                 moviePoster->SetBitmap(scaleImage(wxBitmap("Covers/" + mediaType + "/" + row[1] + ".png", wxBITMAP_TYPE_PNG), 500, 700)); //Load the poster
                 movieDesc->SetLabel("The " + mediaType.substr(0, mediaType.size() - 1) + " directed by " + wxString(row[2]) + ", follows " + wxString(row[8])); //Update description
-                movieDesc->Wrap(frameX-(movieDesc->GetPosition().x + (offsetX*frameX)));
-                movieRandom->Fit();
+                movieDesc->Wrap(frameX-(movieDesc->GetPosition().x + (offsetX*frameX))); //Wraptext
+                movieRandom->Fit(); //Update window after wrapping text
                 std::stringstream iss(row[7]); //Prepare string for splitting (Assign stringstream data type)
                 int counter = 0; //Initialise/reset counter
                 while (iss.good()) //While EOF not hit
