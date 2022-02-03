@@ -168,20 +168,20 @@ void cMain::runFilterQuery(std::string mediaType, bool filterStyle, bool filterF
             }
             while (row = mysql_fetch_row(res))
             {
-                wxBitmap cover = wxBitmap("Covers/" + mediaType + "/" + wxString(row[1]) + ".png", wxBITMAP_TYPE_PNG); //Find movie cover PNG
+                wxBitmap cover = wxBitmap("Gallery/" + mediaType + "/" + row[1] + "/Cover.png", wxBITMAP_TYPE_PNG); //Find movie cover PNG
                 //Define default cover dimensions
-                int coverX = 248;
-                int coverY = 360;
+                int coverX = 237;
+                int coverY = 355;
                 if (frameX != 2560) { //If the user has a different screen size
-                    //Adjust default cover dimensions for the difference in screen size
-                    float tempCoverX = round(coverX*frameXRatio-2);
-                    float tempCoverY = round(coverY*frameYRatio-2);
+                    //Adjust default cover dimensions to account for the difference in screen size
+                    float tempCoverX = round(coverX*frameXRatio);
+                    float tempCoverY = round(coverY*frameYRatio);
                     coverX = tempCoverX;
                     coverY = tempCoverY;
-                    cover = scaleImage(cover, coverX, coverY); //Scale the cover to the new dimensions
                 }
+                cover = scaleImage(cover, coverX, coverY); //Scale the cover to the correct dimensions
                 //Add each cover as a button, with an ID that is equal to the movie's ID + 3 (To avoid interference with other buttons) and then bind the imageClicked function to each button
-                covers[counter] = new wxBitmapButton(movieFiltering, stoi(row[0])+3, cover, wxPoint((counter * (coverX)) - ((floor(counter / 10)) * 10 * (coverX)), (((floor(counter / 10)) * (coverY)) + (125)*frameYRatio)), wxDefaultSize, wxBORDER_NONE);
+                covers[counter] = new wxBitmapButton(movieFiltering, stoi(row[0])+3, cover, wxPoint((counter * (coverX+10)) - ((floor(counter / 10)) * 10 * (coverX+10))+20, (((floor(counter / 10)) * (coverY+10)) + (125)*frameYRatio)), wxDefaultSize, wxBORDER_NONE);
                 covers[counter]->Bind(wxEVT_BUTTON, &cMain::imageClicked, this);
                 noResults = counter;
                 counter++;
@@ -230,7 +230,7 @@ void cMain::runRandomQuery(std::string mediaType, bool random, int movieID)
             }
             while (row = mysql_fetch_row(res)) {
                 movieTitle->SetLabel(wxString(row[1]) + " (" + row[3] + ")"); //Set the text to the name of the movie
-                moviePoster->SetBitmap(scaleImage(wxBitmap("Covers/" + mediaType + "/" + row[1] + ".png", wxBITMAP_TYPE_PNG), 500, 700)); //Load the poster
+                moviePoster->SetBitmap(scaleImage(wxBitmap("Gallery/" + mediaType + "/" + row[1] + "/Cover.png", wxBITMAP_TYPE_PNG), 500, 700)); //Load the poster
                 movieDesc->SetLabel("The " + mediaType.substr(0, mediaType.size() - 1) + " directed by " + wxString(row[2]) + ", follows " + wxString(row[8])); //Update description
                 movieDesc->Wrap(frameX-(movieDesc->GetPosition().x + (offsetX*frameX))); //Wraptext
                 movieRandom->Fit(); //Update window after wrapping text
@@ -254,12 +254,13 @@ void cMain::runRandomQuery(std::string mediaType, bool random, int movieID)
                     counter++;
                 }
                 int totalBtnSize = 0;
+                //Works out the total width of all buttons combined
                 for (int i = 0; i < counter; i++) {
                     totalBtnSize = totalBtnSize + styleList[i]->GetSize().GetWidth();
                 }
-                int btnPosAdjustNo = counter * (totalBtnSize/counter);
+                //Shifts each button according to the space the buttons occupy
                 for (int i = 0; i < counter; i++) {
-                    styleList[i]->Move(wxPoint(styleList[i]->GetPosition().x - btnPosAdjustNo, styleList[i]->GetPosition().y));
+                    styleList[i]->Move(wxPoint(styleList[i]->GetPosition().x - (totalBtnSize)/2, styleList[i]->GetPosition().y));
                 }
             }
         }
@@ -334,7 +335,7 @@ cMain::cMain() : wxFrame(nullptr, wxID_ANY, "RECOMMENGINE", wxPoint(0, 0))
     moviePoster = new wxStaticBitmap(movieRandom, wxID_ANY, scaleImage(wxBitmap("Covers/movies/Blade Runner.png", wxBITMAP_TYPE_PNG), 500, 700), wxPoint(10, 100));
     movieDescHeader = new wxStaticText(movieRandom, wxID_ANY, "SUMMARY:", wxPoint(550, 120));
     movieDesc = new wxStaticText(movieRandom, wxID_ANY, "In the film directed by Ridley Scott, Rick Deckard, an ex - policeman, becomes a special agent with a mission to exterminate a group of violent androids.\nAs he starts getting deeper into his mission, he questions his own identity.", wxPoint(550, 200));
-    randomizerButton = new wxButton(movieRandom, 3, "NEW RANDOM MOVIE", wxPoint(2200, 1245));
+    randomizerButton = new wxButton(movieRandom, 3, "NEW RANDOM MOVIE", wxPoint(100, 850));
     moviePoster->SetFocus();
 
     //Attach containers to pages of notebook and apply font
