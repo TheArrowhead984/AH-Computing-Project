@@ -1,5 +1,6 @@
 //Library inclusions
 #include "cMain.h"
+#include "movie.h"
 #include "mysql.h"
 #include <iostream>
 #include "mysqld_error.h"
@@ -45,13 +46,13 @@ double frameXRatio = 0.0;
 double frameYRatio = 0.0;
 
 //Result Variables
+int noMovies = 0;
 int noResults = 0;
 int noStyles = 0;
-wxBitmapButton *covers[42];
+wxBitmapButton *covers[100];
 wxButton *styleList[8];
 int previousMovie = 0;
-
-
+movie movies[100];
 
 /* <------------------Functions------------------>*/
 
@@ -70,6 +71,22 @@ int randInt(int start, int end)
     std::mt19937 gen(rd()); //Seed generation
     std::uniform_int_distribution<> distr(start, end); //Define range
     return distr(gen);
+}
+
+int getNumberOfEntries(string mediaType) {
+    wxString queryStr = "SELECT COUNT(*) FROM " + mediaType;
+    qstate = mysql_query(conn, queryStr); //Run query
+    if (!qstate) //If query executes without error
+    {
+        res = mysql_store_result(conn);
+        if (res->row_count > 0) {
+            while (row = mysql_fetch_row(res)) {
+                return stoi(row[0]);
+            }
+        }
+        else { return 43; }
+    }
+    else { return 43; }
 }
 
 /* <------------------Event Procedures------------------>*/
@@ -180,8 +197,9 @@ void cMain::runFilterQuery(std::string mediaType, bool filterStyle, bool filterF
                     coverY = tempCoverY;
                 }
                 cover = scaleImage(cover, coverX, coverY); //Scale the cover to the correct dimensions
-                //Add each cover as a button, with an ID that is equal to the movie's ID + 3 (To avoid interference with other buttons) and then bind the imageClicked function to each button
+                //Add each cover as a button, with an ID that is equal to the movie's ID + 3 (To avoid interference with other buttons and allow for the movieID to be calculated using the ID of the object)
                 covers[counter] = new wxBitmapButton(movieFiltering, stoi(row[0])+3, cover, wxPoint((counter * (coverX+10)) - ((floor(counter / 10)) * 10 * (coverX+10))+20, (((floor(counter / 10)) * (coverY+10)) + (125)*frameYRatio)), wxDefaultSize, wxBORDER_NONE);
+                //Bind the imageClicked function to each button
                 covers[counter]->Bind(wxEVT_BUTTON, &cMain::imageClicked, this);
                 noResults = counter;
                 counter++;
@@ -207,11 +225,12 @@ void cMain::runRandomQuery(std::string mediaType, bool random, int movieID)
     //If random movie is wanted
     if (random == true)
     {
-        movieID = randInt(1, 42); //Generate random movieID
+        movieID = randInt(1, noMovies); //Generate random movieID
         //If the movie picked is the same as the previous one, reroll until a different one is found
         while (movieID == previousMovie) {
-            movieID = randInt(1, 42);
+            movieID = randInt(1, noMovies);
         }
+        previousMovie = movieID;
         queryStr = "SELECT * FROM movies WHERE movieID = " + to_string(movieID); //Query using randomly generated int
     }
     //If specific movie is wanted
@@ -243,11 +262,11 @@ void cMain::runRandomQuery(std::string mediaType, bool random, int movieID)
                     //If this is the first button to be added:
                     if (counter == 0)
                     {
-                        styleList[counter] = new wxButton(movieRandom, counter + 43, singleLine, wxPoint(movieTitle->GetPosition().x + movieTitle->GetSize().GetWidth()+((frameX-(offsetX*frameX)-movieTitle->GetSize().GetWidth())/2), 50)); //Add button basing position off of size and pos of the title of the film
+                        styleList[counter] = new wxButton(movieRandom, counter + (noMovies+1), singleLine, wxPoint(movieTitle->GetPosition().x + movieTitle->GetSize().GetWidth()+((frameX-(offsetX*frameX)-movieTitle->GetSize().GetWidth())/2), 50)); //Add button basing position off of size and pos of the title of the film
                     }
                     else
                     {
-                        styleList[counter] = new wxButton(movieRandom, counter + 43, singleLine, wxPoint((styleList[counter-1]->GetPosition().x + styleList[counter-1]->GetSize().GetWidth()), 50)); //Add button basing position off of size and pos of the previous button added
+                        styleList[counter] = new wxButton(movieRandom, counter + (noMovies+1), singleLine, wxPoint((styleList[counter-1]->GetPosition().x + styleList[counter-1]->GetSize().GetWidth()), 50)); //Add button basing position off of size and pos of the previous button added
                     }
                     styleList[counter]->Bind(wxEVT_BUTTON, &cMain::styleClicked, this); //Bind styleClicked function to added button
                     noStyles = counter;
@@ -272,8 +291,6 @@ void cMain::runRandomQuery(std::string mediaType, bool random, int movieID)
         wxMessageBox("Failed\n\nError " + queryErrNo + ": " + mysql_error(conn), wxT("Error"));
     }
 }
-
-
 
 /* <------------------Main ------------------>*/
 
@@ -332,7 +349,7 @@ cMain::cMain() : wxFrame(nullptr, wxID_ANY, "RECOMMENGINE", wxPoint(0, 0))
     movieRandom->SetFont(headingFont);
     movieTitle = new wxStaticText(movieRandom, wxID_ANY, "Blade Runner (1982)", wxPoint(30, 30));
     movieTitle->SetFont(titleFont);
-    moviePoster = new wxStaticBitmap(movieRandom, wxID_ANY, scaleImage(wxBitmap("Covers/movies/Blade Runner.png", wxBITMAP_TYPE_PNG), 500, 700), wxPoint(10, 100));
+    moviePoster = new wxStaticBitmap(movieRandom, wxID_ANY, scaleImage(wxBitmap("Gallery/movies/Blade Runner/Cover.png", wxBITMAP_TYPE_PNG), 500, 700), wxPoint(10, 100));
     movieDescHeader = new wxStaticText(movieRandom, wxID_ANY, "SUMMARY:", wxPoint(550, 120));
     movieDesc = new wxStaticText(movieRandom, wxID_ANY, "In the film directed by Ridley Scott, Rick Deckard, an ex - policeman, becomes a special agent with a mission to exterminate a group of violent androids.\nAs he starts getting deeper into his mission, he questions his own identity.", wxPoint(550, 200));
     randomizerButton = new wxButton(movieRandom, 3, "NEW RANDOM MOVIE", wxPoint(100, 850));
@@ -354,6 +371,7 @@ cMain::cMain() : wxFrame(nullptr, wxID_ANY, "RECOMMENGINE", wxPoint(0, 0))
     movieStyleCombo->SetSelection(0);
     movieFeatureCombo->SetSelection(0);
     movieAgeCombo->SetSelection(0);
+    noMovies = getNumberOfEntries("movies");
     runFilterQuery("movies", false, false, false, "ANY", "ANY", "ANY", covers);
     runRandomQuery("movies", false, 1);
 }

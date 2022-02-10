@@ -10,8 +10,6 @@ class cMain : public wxFrame
 public:
 	cMain();
 	~cMain();
-
-public:
 	//Base Panel
 	wxPanel *basePanel = nullptr;
 	//Title
