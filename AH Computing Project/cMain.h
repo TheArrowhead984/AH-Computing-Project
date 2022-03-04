@@ -42,7 +42,7 @@ public:
 	void imageClicked(wxCommandEvent &evt);
 	void styleClicked(wxCommandEvent &evt);
 	void newRandomMovie(wxCommandEvent &evt);
-	void runFilterQuery(std::string mediaType, bool filterStyle, bool filterFeature, bool filterAge, wxString selectedStyle, wxString selectedFeature, wxString selectedAge, wxBitmapButton *covers[]);
+	void runFilterQuery(std::string mediaType, bool filterStyle, bool filterFeature, bool filterAge, wxString selectedStyle, wxString selectedFeature, wxString selectedAge);
 	void runRandomQuery(std::string mediaType, bool random, int movieID);
 
 	wxDECLARE_EVENT_TABLE();

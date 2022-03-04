@@ -11,7 +11,7 @@ using namespace std;
 class movie {
 public:
     /* <-----Class Variables----->*/
-    wxBitmapButton *cover = nullptr;
+    wxBitmap *cover = nullptr;
     wxString title = "";
     wxString director = "";
     int releaseDate = 0;
@@ -23,10 +23,19 @@ public:
     /* <-----Class Methods----->*/
     //Default Constructor
     movie() {
-        
+        cover = nullptr;
+        title = "";
+        director = "";
+        releaseDate = 0;
+        ageRating = "";
+        duration = "";
+        for (int i = 0; i < 8; i++) {
+            styles[i] = "";
+        }
+        description = "";
     }
     //Constructor
-    movie(wxBitmapButton *cvr, string tle, string dir, int relDte, string ageRat, string dur, string stys[], string desc) {
+    movie(wxBitmap *cvr, std::string tle, std::string dir, int relDte, std::string ageRat, std::string dur, std::string stys[], std::string desc) {
         cover = cvr;
         title = tle;
         director = dir;
