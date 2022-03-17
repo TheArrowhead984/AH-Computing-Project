@@ -2,12 +2,6 @@
 #include "cMain.h"
 #include "movie.h"
 #include "mysql.h"
-#include <iostream>
-#include "mysqld_error.h"
-#include <thread>
-#include <chrono>
-#include <typeinfo>
-#include <array>
 #include <random>
 #include <sstream>
 
@@ -21,11 +15,6 @@ wxEND_EVENT_TABLE()
 
 
 /* <------------------Define global variables------------------>*/
-
-//Namespaces
-using namespace std;
-using namespace std::this_thread;
-using namespace std::chrono;
 
 //SQL stuff
 int qstate;
@@ -73,7 +62,7 @@ int randInt(int start, int end)
 	return distr(gen);
 }
 
-int getNumberOfEntries(string mediaType) {
+int getNumberOfEntries(std::string mediaType) {
 	wxString queryStr = "SELECT COUNT(*) FROM " + mediaType;
 	qstate = mysql_query(conn, queryStr); //Run query
 	if (!qstate) //If query executes without error
@@ -81,24 +70,24 @@ int getNumberOfEntries(string mediaType) {
 		res = mysql_store_result(conn);
 		if (res->row_count > 0) {
 			while (row = mysql_fetch_row(res)) {
-				return stoi(row[0]);
+				return std::stoi(row[0]);
 			}
 		}
-		else { return 43; }
+		else { return 44; }
 	}
-	else { return 43; }
+	else { return 44; }
 }
 
 void initializeMovies(int movieID) {
 
-	qstate = mysql_query(conn, ("SELECT * FROM movies WHERE movieID = " + to_string(movieID)).c_str()); //Run query
+	qstate = mysql_query(conn, ("SELECT * FROM movies WHERE movieID = " + std::to_string(movieID)).c_str()); //Run query
 	if (!qstate) //If query executes without error
 	{
 		res = mysql_store_result(conn);
 		if (res->row_count > 0) //If the query returns results
 		{
 			while (row = mysql_fetch_row(res)) {
-				string testArr[8];
+				std::string testArr[8];
 				std::stringstream iss(row[7]); //Prepare string for splitting (Assign stringstream data type)
 				int counter = 0; //Initialise/reset counter
 				while (iss.good()) //While EOF not hit
@@ -108,7 +97,7 @@ void initializeMovies(int movieID) {
 					testArr[counter] = singleLine;
 					counter++;
 				}
-				movies[movieID] = new movie(new wxBitmap("Gallery/movies/" + string(row[1]) + "/Cover.png", wxBITMAP_TYPE_PNG), string(row[1]), string(row[2]), stoi(row[3]), string(row[4]), string(row[5]), testArr, string(row[8]));
+				movies[movieID] = new movie(new wxBitmap("Gallery/movies/" + std::string(row[1]) + "/Cover.png", wxBITMAP_TYPE_PNG), std::string(row[1]), std::string(row[2]), std::stoi(row[3]), std::string(row[4]), std::string(row[5]), testArr, std::string(row[8]));
 			}
 		}
 	}
@@ -123,10 +112,13 @@ void cMain::applyFilters(wxCommandEvent &evt)
 	wxString selectedStyle = movieStyleCombo->GetStringSelection();
 	wxString selectedFeature = movieFeatureCombo->GetStringSelection();
 	wxString selectedAge = movieAgeCombo->GetStringSelection();
+	wxString selectedReleaseStart = movieReleaseStartVal->GetStringSelection();
+	wxString selectedReleaseEnd = movieReleaseEndVal->GetStringSelection();
 	//Initialise booleans
 	bool filterStyle = false;
 	bool filterFeature = false;
 	bool filterAge = false;
+	bool filterRelease = false;
 
 	//Set whether the user is filtering attribute
 	if (selectedStyle != wxT("ANY")) {
@@ -138,7 +130,10 @@ void cMain::applyFilters(wxCommandEvent &evt)
 	if (selectedAge != wxT("ANY")) {
 		filterAge = true;
 	}
-	runFilterQuery("movies", filterStyle, filterFeature, filterAge, selectedStyle, selectedFeature, selectedAge); //Plug info into func
+	if (selectedReleaseStart != wxT("ANY") && selectedReleaseEnd != wxT("ANY")) {
+		filterRelease = true;
+	}
+	runFilterQuery("movies", filterStyle, filterFeature, filterAge, filterRelease, selectedStyle, selectedFeature, selectedAge, selectedReleaseStart, selectedReleaseEnd); //Plug info into func
 }
 
 /* <-----Procedure that resets filtering----->*/
@@ -148,20 +143,16 @@ void cMain::resetFilters(wxCommandEvent &evt)
 	movieStyleCombo->SetSelection(0);
 	movieFeatureCombo->SetSelection(0);
 	movieAgeCombo->SetSelection(0);
-	runFilterQuery("movies", false, false, false, "ANY", "ANY", "ANY"); //Run filter query without any filters applied
-}
-
-/* <-----Procedure that generates a random movie----->*/
-void cMain::newRandomMovie(wxCommandEvent &evt)
-{
-	runRandomQuery("movies", true, 0);
+	movieReleaseStartVal->SetSelection(0);
+	movieReleaseEndVal->SetSelection(0);
+	runFilterQuery("movies", false, false, false, false); //Run filter query without any filters applied
 }
 
 /* <-----Procedure that shows info for a specific film----->*/
 void cMain::imageClicked(wxCommandEvent &evt)
 {
 	searchTypeNB->ChangeSelection(2); //Change selected page to the random page
-	runRandomQuery("movies", false, evt.GetId() - 3);
+	runRandomQuery("movies", false, evt.GetId() - 5);
 }
 
 /* <-----Procedure that filters for a style shown on the random page----->*/
@@ -173,26 +164,35 @@ void cMain::styleClicked(wxCommandEvent &evt)
 	movieStyleCombo->SetSelection(movieStyleCombo->FindString(btn->GetLabel())); //Set selected style filter to the text on the button the user clicked
 	movieFeatureCombo->SetSelection(0);
 	movieAgeCombo->SetSelection(0);
-	runFilterQuery("movies", true, false, false, btn->GetLabel(), "", ""); //Filter for the style the user selected
+	runFilterQuery("movies", true, false, false, false, btn->GetLabel()); //Filter for the style the user selected
+}
+
+/* <-----Procedure that generates a random movie----->*/
+void cMain::newRandomMovie(wxCommandEvent &evt)
+{
+	runRandomQuery("movies", true, 0);
 }
 
 /* <-----Procedure that constructs and executes SQL queries from selected filters----->*/
-void cMain::runFilterQuery(std::string mediaType, bool filterStyle, bool filterFeature, bool filterAge, wxString selectedStyle, wxString selectedFeature, wxString selectedAge)
+void cMain::runFilterQuery(std::string mediaType, bool filterStyle, bool filterFeature, bool filterAge, bool filterRelease, wxString selectedStyle, wxString selectedFeature, wxString selectedAge, wxString selectedReleaseStart, wxString selectedReleaseEnd)
 {
 	//Construct SQL query from user filters
-	string queryStr = "SELECT movieID FROM " + mediaType + " WHERE ";
-	if (filterStyle == true) {
+	std::string queryStr = "SELECT movieID FROM " + mediaType + " WHERE ";
+	if (filterStyle) {
 		queryStr.append("INSTR(styles, '" + selectedStyle + "') <> 0");
 		if (filterFeature == true || filterAge == true) { queryStr.append(" AND "); }
 	}
-	if (filterFeature == true) {
+	if (filterFeature) {
 		queryStr.append("INSTR(features, '" + selectedFeature + "') <> 0");
 		if (filterAge == true) { queryStr.append(" AND "); }
 	}
-	if (filterAge == true) {
+	if (filterAge) {
 		queryStr.append("ageRating = '" + selectedAge + "'");
 	}
-	if (filterStyle != true && filterFeature != true && filterAge != true) {
+	if (filterRelease) {
+		queryStr.append(" releaseDate BETWEEN " + selectedReleaseStart + " AND " + selectedReleaseEnd);
+	}
+	if (filterStyle != true && filterFeature != true && filterAge != true && filterRelease != true) {
 		queryStr = "SELECT movieID FROM " + mediaType;
 	}
 
@@ -210,7 +210,7 @@ void cMain::runFilterQuery(std::string mediaType, bool filterStyle, bool filterF
 			}
 			while (row = mysql_fetch_row(res))
 			{
-				wxBitmap cover = *movies[stoi(row[0])]->cover;
+				wxBitmap cover = *movies[std::stoi(row[0])]->cover;
 				//Define default cover dimensions
 				int coverX = 237;
 				int coverY = 355;
@@ -222,8 +222,8 @@ void cMain::runFilterQuery(std::string mediaType, bool filterStyle, bool filterF
 					coverY = tempCoverY;
 				}
 				cover = scaleImage(cover, coverX, coverY); //Scale the cover to the correct dimensions
-				//Add each cover as a button, with an ID that is equal to the movie's ID + 3 (To avoid interference with other buttons and allow for the movieID to be calculated using the ID of the object)
-				covers[counter] = new wxBitmapButton(movieFiltering, stoi(row[0]) + 3, cover, wxPoint((counter * (coverX + 10)) - ((floor(counter / 10)) * 10 * (coverX + 10)) + 20, (((floor(counter / 10)) * (coverY + 10)) + (125) * frameYRatio)), wxDefaultSize, wxBORDER_NONE);
+				//Add each cover as a button, with an ID that is equal to the movie's ID + an int (To avoid interference with other buttons and allow for the movieID to be calculated using the ID of the object)
+				covers[counter] = new wxBitmapButton(movieFiltering, std::stoi(row[0]) + 5, cover, wxPoint((counter * (coverX + 10)) - ((floor(counter / 10)) * 10 * (coverX + 10)) + 20, (((floor(counter / 10)) * (coverY + 10)) + (125) * frameYRatio)), wxDefaultSize, wxBORDER_NONE);
 				//Bind the imageClicked function to each button
 				covers[counter]->Bind(wxEVT_BUTTON, &cMain::imageClicked, this);
 				counter++;
@@ -261,7 +261,7 @@ void cMain::runRandomQuery(std::string mediaType, bool random, int movieID)
 	{
 		delete styleList[i]; //Delete style tag buttons one by one
 	}
-	movieTitle->SetLabel(movies[movieID]->title + " (" + to_string(movies[movieID]->releaseDate) + ")"); //Set the text to the name of the movie
+	movieTitle->SetLabel(movies[movieID]->title + " (" + std::to_string(movies[movieID]->releaseDate) + ")"); //Set the text to the name of the movie
 	moviePoster->SetBitmap(scaleImage(*movies[movieID]->cover, 500, 700)); //Load the poster
 	movieDesc->SetLabel("The " + mediaType.substr(0, mediaType.size() - 1) + " directed by " + movies[movieID]->director + ", follows " + movies[movieID]->description); //Update description
 	movieDesc->Wrap(frameX - (movieDesc->GetPosition().x + (offsetX * frameX))); //Wraptext
@@ -333,15 +333,21 @@ cMain::cMain() : wxFrame(nullptr, wxID_ANY, "RECOMMENGINE", wxPoint(0, 0))
 	movieRandom = new wxPanel(searchTypeNB, wxID_ANY);
 
 	//Define dropdown options
-	wxString movieStyles[24] = { "ANY", "Action", "Adventure", "Animation", "Arthouse", "Comedy", "Crime", "Drama", "Fantasy", "Fiction", "Historical", "Horror", "Mystery", "Neo-Noir", "Noir", "Non-Fiction", "Post-Apocalyptic", "Realistic", "Romance", "Satire", "Sci-Fi", "Surreal", "Thriller", "Western" };
+	wxString movieStyles[23] = { "ANY", "Action", "Adventure", "Animation", "Arthouse", "Comedy", "Crime", "Drama", "Fantasy", "Fiction", "Historical", "Horror", "Mystery", "Noir", "Non-Fiction", "Post-Apocalyptic", "Realistic", "Romance", "Satire", "Sci-Fi", "Surreal", "Thriller", "Western" };
 	wxString movieFeatures[7] = { "ANY", "Acting", "Fun", "Soundtrack", "Story", "Thought-Provoking", "Visuals" };
 	wxString movieAges[6] = { "ANY", "U", "PG", "12", "15", "18" };
+	wxString years[53] = { "ANY" };
+	int startYear = 1970;
+	for (int i = 1; i < 53; i++) {
+		startYear++;
+		years[i] = std::to_string(startYear);
+	}
 
 	//Add UI elements
 	//Filtering
 	movieFiltering->SetFont(headingFont);
 	movieStyleHead = new wxStaticText(movieFiltering, wxID_ANY, "Style:", wxPoint(offsetX * frameX, offsetY * frameY));
-	movieStyleCombo = new wxChoice(movieFiltering, wxID_ANY, wxPoint(movieStyleHead->GetPosition().x + movieStyleHead->GetSize().GetWidth() + (headingFontSize * offsetX) / 100 * frameX, (offsetY * frameY) - 1), wxDefaultSize, wxArrayString(24, movieStyles));
+	movieStyleCombo = new wxChoice(movieFiltering, wxID_ANY, wxPoint(movieStyleHead->GetPosition().x + movieStyleHead->GetSize().GetWidth() + (headingFontSize * offsetX) / 100 * frameX, (offsetY * frameY) - 1), wxDefaultSize, wxArrayString(23, movieStyles));
 	movieStyleCombo->SetFont(btnFont);
 	movieFeatureHead = new wxStaticText(movieFiltering, wxID_ANY, "Outstanding Element:", wxPoint(movieStyleCombo->GetPosition().x + movieStyleCombo->GetSize().GetWidth() + offsetX * frameX, offsetY * frameY));
 	movieFeatureCombo = new wxChoice(movieFiltering, wxID_ANY, wxPoint(movieFeatureHead->GetPosition().x + movieFeatureHead->GetSize().GetWidth() + (headingFontSize * offsetX) / 100 * frameX, (offsetY * frameY) - 1), wxDefaultSize, wxArrayString(7, movieFeatures));
@@ -349,7 +355,14 @@ cMain::cMain() : wxFrame(nullptr, wxID_ANY, "RECOMMENGINE", wxPoint(0, 0))
 	movieAgeHead = new wxStaticText(movieFiltering, wxID_ANY, "Age Rating:", wxPoint(movieFeatureCombo->GetPosition().x + movieFeatureCombo->GetSize().GetWidth() + offsetX * frameX, offsetY * frameY));
 	movieAgeCombo = new wxChoice(movieFiltering, wxID_ANY, wxPoint(movieAgeHead->GetPosition().x + movieAgeHead->GetSize().GetWidth() + (headingFontSize * offsetX) / 100 * frameX, (offsetY * frameY) - 1), wxDefaultSize, wxArrayString(6, movieAges));
 	movieAgeCombo->SetFont(btnFont);
-	applyFiltersBtn = new wxButton(movieFiltering, 1, "APPLY", wxPoint(movieAgeCombo->GetPosition().x + movieAgeCombo->GetSize().GetWidth() + offsetX * frameX, (offsetY * frameY) - 1));
+	movieReleaseHead = new wxStaticText(movieFiltering, wxID_ANY, "Release Date Range:", wxPoint(movieAgeCombo->GetPosition().x + movieAgeCombo->GetSize().GetWidth() + offsetX * frameX, offsetY * frameY));
+	movieReleaseStartVal = new wxChoice(movieFiltering, 4, wxPoint(movieReleaseHead->GetPosition().x + movieReleaseHead->GetSize().GetWidth() + offsetX * frameX, (offsetY * frameY) - 1), wxDefaultSize, wxArrayString(53, years));
+	movieReleaseStartVal->SetFont(btnFont);
+	movieReleaseStartVal->SetStringSelection("ANY");
+	movieReleaseEndVal = new wxChoice(movieFiltering, 5, wxPoint(movieReleaseStartVal->GetPosition().x + movieReleaseStartVal->GetSize().GetWidth() + offsetX * frameX, (offsetY * frameY) - 1), wxDefaultSize, wxArrayString(53, years));
+	movieReleaseEndVal->SetFont(btnFont);
+	movieReleaseEndVal->SetStringSelection("ANY");
+	applyFiltersBtn = new wxButton(movieFiltering, 1, "APPLY", wxPoint(movieReleaseEndVal->GetPosition().x + movieReleaseEndVal->GetSize().GetWidth() + offsetX * frameX, (offsetY * frameY) - 1));
 	applyFiltersBtn->SetFont(btnFont);
 	resetFiltersBtn = new wxButton(movieFiltering, 2, "RESET", wxPoint(applyFiltersBtn->GetPosition().x + applyFiltersBtn->GetSize().GetWidth() + offsetX * frameX, (offsetY * frameY) - 1));
 	resetFiltersBtn->SetFont(btnFont);
@@ -362,7 +375,6 @@ cMain::cMain() : wxFrame(nullptr, wxID_ANY, "RECOMMENGINE", wxPoint(0, 0))
 	movieDesc = new wxStaticText(movieRandom, wxID_ANY, "In the film directed by Ridley Scott, Rick Deckard, an ex - policeman, becomes a special agent with a mission to exterminate a group of violent androids.\nAs he starts getting deeper into his mission, he questions his own identity.", wxPoint(550, 200));
 	randomizerButton = new wxButton(movieRandom, 3, "NEW RANDOM MOVIE", wxPoint(100, 850));
 	moviePoster->SetFocus();
-
 	//Attach containers to pages of notebook and apply font
 	searchTypeNB->AddPage(movieFiltering, "FILTER");
 	searchTypeNB->AddPage(new wxPanel(searchTypeNB, 2), "SEARCH");
@@ -383,7 +395,7 @@ cMain::cMain() : wxFrame(nullptr, wxID_ANY, "RECOMMENGINE", wxPoint(0, 0))
 	for (int i = 1; i <= noMovies; i++) {
 		initializeMovies(i);
 	}
-	runFilterQuery("movies", false, false, false, "ANY", "ANY", "ANY");
+	runFilterQuery("movies", false, false, false, false);
 	runRandomQuery("movies", false, 1);
 }
 

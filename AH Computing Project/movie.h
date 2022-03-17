@@ -1,13 +1,3 @@
-#pragma once
-#include "wx/wx.h"
-#include "wx/grid.h"
-#include "wx/msgdlg.h"
-#include "wx/notebook.h"
-#include <iostream>
-#include <string>
-
-using namespace std;
-
 class movie {
 public:
     /* <-----Class Variables----->*/

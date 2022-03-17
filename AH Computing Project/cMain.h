@@ -28,6 +28,9 @@ public:
 	wxChoice *movieFeatureCombo = nullptr;
 	wxStaticText *movieAgeHead = nullptr;
 	wxChoice *movieAgeCombo = nullptr;
+	wxStaticText *movieReleaseHead = nullptr;
+	wxChoice *movieReleaseStartVal = nullptr;
+	wxChoice *movieReleaseEndVal = nullptr;
 	wxButton *applyFiltersBtn = nullptr;
 	wxButton *resetFiltersBtn = nullptr;
 	//UI elements for random
@@ -42,7 +45,7 @@ public:
 	void imageClicked(wxCommandEvent &evt);
 	void styleClicked(wxCommandEvent &evt);
 	void newRandomMovie(wxCommandEvent &evt);
-	void runFilterQuery(std::string mediaType, bool filterStyle, bool filterFeature, bool filterAge, wxString selectedStyle, wxString selectedFeature, wxString selectedAge);
+	void runFilterQuery(std::string mediaType, bool filterStyle=false, bool filterFeature=false, bool filterAge=false, bool filterRelease=false, wxString selectedStyle = "ANY", wxString selectedFeature = "ANY", wxString selectedAge = "ANY", wxString selectedReleaseStart = "ANY", wxString selectedReleaseEnd="ANY");
 	void runRandomQuery(std::string mediaType, bool random, int movieID);
 
 	wxDECLARE_EVENT_TABLE();
