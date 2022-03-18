@@ -31,8 +31,13 @@ public:
 	wxStaticText *movieReleaseHead = nullptr;
 	wxChoice *movieReleaseStartVal = nullptr;
 	wxChoice *movieReleaseEndVal = nullptr;
-	wxButton *applyFiltersBtn = nullptr;
-	wxButton *resetFiltersBtn = nullptr;
+	wxStaticText *movieDurationHead = nullptr;
+	wxChoice *movieDurationStartVal = nullptr;
+	wxChoice *movieDurationEndVal = nullptr;
+	wxButton *movieApplyFiltersBtn = nullptr;
+	wxButton *movieResetFiltersBtn = nullptr;
+	wxBitmapButton *movieSortDirection = nullptr;
+	wxChoice *movieSortChoice = nullptr;
 	//UI elements for random
 	wxStaticText *movieTitle = nullptr;
 	wxStaticBitmap *moviePoster = nullptr;
@@ -40,13 +45,15 @@ public:
 	wxStaticText *movieDesc = nullptr;
 	wxButton *randomizerButton = nullptr;
 
-	void applyFilters(wxCommandEvent &evt);
-	void resetFilters(wxCommandEvent &evt);
-	void imageClicked(wxCommandEvent &evt);
-	void styleClicked(wxCommandEvent &evt);
+	void movieApplyFilters(wxCommandEvent &evt);
+	void movieResetFilters(wxCommandEvent &evt);
+	void movieImageClicked(wxCommandEvent &evt);
+	void movieStyleClicked(wxCommandEvent &evt);
 	void newRandomMovie(wxCommandEvent &evt);
-	void runFilterQuery(std::string mediaType, bool filterStyle=false, bool filterFeature=false, bool filterAge=false, bool filterRelease=false, wxString selectedStyle = "ANY", wxString selectedFeature = "ANY", wxString selectedAge = "ANY", wxString selectedReleaseStart = "ANY", wxString selectedReleaseEnd="ANY");
-	void runRandomQuery(std::string mediaType, bool random, int movieID);
+	void changeSortDirection(wxCommandEvent &evt);
+	void sortChoiceMade(wxCommandEvent &evt);
+	void runFilterQuery(std::string mediaType, bool filterStyle=false, bool filterFeature=false, bool filterAge=false, bool filterRelease=false, bool filterDuration=false, bool sort=false, wxString selectedStyle = "ANY", wxString selectedFeature = "ANY", wxString selectedAge = "ANY", wxString selectedReleaseStart = "ANY", wxString selectedReleaseEnd="ANY", wxString selectedDurationStart = "ANY", wxString selectedDurationEnd = "ANY", wxString sortedField="", bool sortDirection=false);
+	void runRandomQuery(std::string mediaType, bool random=false, int movieID=1);
 
 	wxDECLARE_EVENT_TABLE();
 };
