@@ -252,7 +252,6 @@ void cMain::runFilterQuery(std::string mediaType, bool filterStyle, bool filterF
 		sortedField.erase(std::remove(sortedField.begin(), sortedField.end(), ' '), sortedField.end());
 		queryStr.append(" ORDER BY " + sortedField + " " + (sortDirection ? "desc" : "asc"));
 	}
-	wxMessageBox(queryStr);
 	//Execute constructed query
 	qstate = mysql_query(conn, queryStr.c_str());
 	if (!qstate) //If query executes successfully
