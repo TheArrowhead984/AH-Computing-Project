@@ -2,13 +2,13 @@ class movie {
 public:
     /* <-----Class Variables----->*/
     wxBitmap *cover = nullptr;
-    wxString title = "";
-    wxString director = "";
+    std::string title = "";
+    std::string director = "";
     int releaseDate = 0;
-    wxString ageRating = "";
-    wxString duration = "";
-    wxString styles[8];
-    wxString description = "";
+    std::string ageRating = "";
+    std::string duration = "";
+    std::string styles[8];
+    std::string description = "";
 
     /* <-----Class Methods----->*/
     //Default Constructor
