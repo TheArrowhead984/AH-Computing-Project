@@ -105,7 +105,7 @@ void initializeMovies(int movieID) {
 					testArr[counter] = singleLine;
 					counter++;
 				}
-				movies[movieID] = new movie(new wxBitmap("Gallery/movies/" + std::string(row[1]) + "/Cover.png", wxBITMAP_TYPE_PNG), std::string(row[1]), std::string(row[2]), std::stoi(row[3]), std::string(row[4]), std::string(row[5]), testArr, std::string(row[8]));
+				movies[movieID] = new movie(new wxBitmap("Resources/Gallery/movies/" + std::string(row[1]) + "/Cover.png", wxBITMAP_TYPE_PNG), std::string(row[1]), std::string(row[2]), std::stoi(row[3]), std::string(row[4]), std::string(row[5]), testArr, std::string(row[8]));
 			}
 		}
 	}
@@ -167,7 +167,7 @@ void cMain::movieResetFilters(wxCommandEvent &evt)
 	movieSortDataType = "Alpha";
 	movieSort = false;
 	movieSortType = true;
-	movieSortDirection->SetBitmap(scaleImage(wxBitmap("Gallery/UI/" + movieSortDataType + " - Ascending.png", wxBITMAP_TYPE_PNG), 34, 34));
+	movieSortDirection->SetBitmap(scaleImage(wxBitmap("Resources/Gallery/UI/" + movieSortDataType + " - Ascending.png", wxBITMAP_TYPE_PNG), 34, 34));
 	runFilterQuery("movies", movieCovers, movieInfo); //Run filter query without any filters applied
 }
 
@@ -195,7 +195,7 @@ void cMain::movieStyleClicked(wxCommandEvent &evt)
 	movieSortDataType = "Alpha";
 	movieSort = false;
 	movieSortType = true;
-	movieSortDirection->SetBitmap(scaleImage(wxBitmap("Gallery/UI/" + movieSortDataType + " - Ascending.png", wxBITMAP_TYPE_PNG), 34, 34));
+	movieSortDirection->SetBitmap(scaleImage(wxBitmap("Resources/Gallery/UI/" + movieSortDataType + " - Ascending.png", wxBITMAP_TYPE_PNG), 34, 34));
 	runFilterQuery("movies", movieCovers, movieInfo, true, false, false, false, false, btn->GetLabel()); //Filter for the style the user selected
 }
 
@@ -208,11 +208,11 @@ void cMain::newRandomMovie(wxCommandEvent &evt)
 void cMain::changeSortDirection(wxCommandEvent &evt)
 {
 	if (movieSort) {
-		movieSortDirection->SetBitmap(scaleImage(wxBitmap("Gallery/UI/" + movieSortDataType + " - Ascending.png", wxBITMAP_TYPE_PNG), 34, 34));
+		movieSortDirection->SetBitmap(scaleImage(wxBitmap("Resources/Gallery/UI/" + movieSortDataType + " - Ascending.png", wxBITMAP_TYPE_PNG), 34, 34));
 		movieSort = false;
 	}
 	else {
-		movieSortDirection->SetBitmap(scaleImage(wxBitmap("Gallery/UI/" + movieSortDataType + " - Descending.png", wxBITMAP_TYPE_PNG), 34, 34));
+		movieSortDirection->SetBitmap(scaleImage(wxBitmap("Resources/Gallery/UI/" + movieSortDataType + " - Descending.png", wxBITMAP_TYPE_PNG), 34, 34));
 		movieSort = true;
 	}
 }
@@ -226,10 +226,10 @@ void cMain::sortChoiceMade(wxCommandEvent &evt)
 		movieSortDataType = "Number";
 	}
 	if (movieSort) {
-		movieSortDirection->SetBitmap(scaleImage(wxBitmap("Gallery/UI/" + movieSortDataType + " - Descending.png", wxBITMAP_TYPE_PNG), 34, 34));
+		movieSortDirection->SetBitmap(scaleImage(wxBitmap("Resources/Gallery/UI/" + movieSortDataType + " - Descending.png", wxBITMAP_TYPE_PNG), 34, 34));
 	}
 	else {
-		movieSortDirection->SetBitmap(scaleImage(wxBitmap("Gallery/UI/" + movieSortDataType + " - Ascending.png", wxBITMAP_TYPE_PNG), 34, 34));
+		movieSortDirection->SetBitmap(scaleImage(wxBitmap("Resources/Gallery/UI/" + movieSortDataType + " - Ascending.png", wxBITMAP_TYPE_PNG), 34, 34));
 	}
 }
 
@@ -487,14 +487,14 @@ cMain::cMain() : wxFrame(nullptr, wxID_ANY, "RECOMMENGINE", wxPoint(0, 0))
 	movieApplyFiltersBtn->SetFont(btnFont);
 	movieResetFiltersBtn = new wxButton(movieFiltering, 2, "RESET", wxPoint(movieApplyFiltersBtn->GetPosition().x + movieApplyFiltersBtn->GetSize().GetWidth() + offsetX * frameX, (offsetY * frameY) - 1));
 	movieResetFiltersBtn->SetFont(btnFont);
-	movieSortDirection = new wxBitmapButton(movieFiltering, 4, scaleImage(wxBitmap("Gallery/UI/Alpha - Ascending.png", wxBITMAP_TYPE_PNG), 34, 34), wxPoint(offsetX * frameX, offsetY * frameY + 59));
+	movieSortDirection = new wxBitmapButton(movieFiltering, 4, scaleImage(wxBitmap("Resources/Gallery/UI/Alpha - Ascending.png", wxBITMAP_TYPE_PNG), 34, 34), wxPoint(offsetX * frameX, offsetY * frameY + 59));
 	movieSortChoice = new wxChoice(movieFiltering, 5, wxPoint(movieSortDirection->GetPosition().x + movieSortDirection->GetSize().GetWidth() + 1 / 2 * offsetX * frameX, (offsetY * frameY) + 60), wxDefaultSize, wxArrayString(5, columns));
 	movieSortChoice->SetSelection(0);
 	//Random
 	movieRandom->SetFont(headingFont);
 	movieTitle = new wxStaticText(movieRandom, wxID_ANY, "Blade Runner (1982)", wxPoint(30, 30));
 	movieTitle->SetFont(titleFont);
-	moviePoster = new wxStaticBitmap(movieRandom, wxID_ANY, scaleImage(wxBitmap("Gallery/movies/Blade Runner/Cover.png", wxBITMAP_TYPE_PNG), 500, 700), wxPoint(10, 100));
+	moviePoster = new wxStaticBitmap(movieRandom, wxID_ANY, scaleImage(wxBitmap("Resources/Gallery/movies/Blade Runner/Cover.png", wxBITMAP_TYPE_PNG), 500, 700), wxPoint(10, 100));
 	movieDescHeader = new wxStaticText(movieRandom, wxID_ANY, "SUMMARY:", wxPoint(550, 120));
 	movieDesc = new wxStaticText(movieRandom, wxID_ANY, "In the film directed by Ridley Scott, Rick Deckard, an ex - policeman, becomes a special agent with a mission to exterminate a group of violent androids.\nAs he starts getting deeper into his mission, he questions his own identity.", wxPoint(550, 200));
 	randomizerButton = new wxButton(movieRandom, 3, "NEW RANDOM MOVIE", wxPoint(100, 850));
