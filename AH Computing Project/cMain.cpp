@@ -313,7 +313,7 @@ void cMain::runFilterQuery(std::string mediaType, wxBitmapButton *mediaTypeCover
 				else if (sortedField == "Duration") {
 					movieInfoStr = movies[std::stoi(row[0])]->duration;
 				}
-				mediaTypeInfo[counter] = new wxStaticText(movieFiltering, wxID_ANY, movieInfoStr, wxPoint(mediaTypeCovers[counter]->GetPosition().x + (mediaTypeCovers[counter]->GetSize().GetWidth()) / 2, (((floor(counter / 10)) * (coverY + 100*frameYRatio)) + (200*frameYRatio + coverY))), wxDefaultSize, wxALIGN_CENTRE_HORIZONTAL);
+				mediaTypeInfo[counter] = new wxStaticText(movieFiltering, wxID_ANY, movieInfoStr, wxPoint(mediaTypeCovers[counter]->GetPosition().x + (mediaTypeCovers[counter]->GetSize().GetWidth()) / 2, (((floor(counter / 10)) * (coverY + 100 * frameYRatio)) + (200 * frameYRatio + coverY))), wxDefaultSize, wxALIGN_CENTRE_HORIZONTAL);
 				mediaTypeInfo[counter]->SetFont(wxFontInfo(18 * frameXRatio).Light()); //Scale text slightly
 				mediaTypeInfo[counter]->Wrap(coverX); //Wraptext
 				mediaTypeInfo[counter]->SetPosition(wxPoint(mediaTypeInfo[counter]->GetPosition().x - (mediaTypeInfo[counter]->GetSize().GetWidth()) / 2, mediaTypeInfo[counter]->GetPosition().y + (15 * frameYRatio))); //Center text under cover
@@ -427,7 +427,7 @@ cMain::cMain() : wxFrame(nullptr, wxID_ANY, "RECOMMENGINE", wxPoint(0, 0))
 	mediaNB = new wxNotebook(basePanel, wxID_ANY, wxPoint(0, title->GetSize().GetHeight()), basePanel->GetSize(), wxNB_LEFT);
 	searchTypeNB = new wxNotebook(mediaNB, wxID_ANY, wxPoint(offsetX * frameX, 0));
 	movieFiltering = new wxScrolledWindow(searchTypeNB, wxID_ANY);
-	movieFiltering->SetScrollbars(0, 20 , 0, 127 * frameYRatio);
+	movieFiltering->SetScrollbars(0, 20, 0, 127 * frameYRatio);
 	movieRandom = new wxPanel(searchTypeNB, wxID_ANY);
 
 	//Define dropdown options
@@ -497,8 +497,8 @@ cMain::cMain() : wxFrame(nullptr, wxID_ANY, "RECOMMENGINE", wxPoint(0, 0))
 	movieApplyFiltersBtn->SetFont(btnFont);
 	movieResetFiltersBtn = new wxButton(movieFiltering, 2, "RESET", wxPoint(movieApplyFiltersBtn->GetPosition().x + movieApplyFiltersBtn->GetSize().GetWidth() + offsetX * frameX, (offsetY * frameY) - 1));
 	movieResetFiltersBtn->SetFont(btnFont);
-	movieSortDirection = new wxBitmapButton(movieFiltering, 4, scaleImage(wxBitmap("Resources/Gallery/UI/Alpha - Ascending.png", wxBITMAP_TYPE_PNG), (int)(34 * frameXRatio + 0.5), (int)(34 * frameYRatio + 0.5)), wxPoint(offsetX * frameX, offsetY * frameY + 59*frameYRatio));
-	movieSortChoice = new wxChoice(movieFiltering, 5, wxPoint(movieSortDirection->GetPosition().x + movieSortDirection->GetSize().GetWidth() + 1 / 2 * (headingFontSize * offsetX) / 100 * frameX, (offsetY * frameY) + 60*frameYRatio), wxDefaultSize, wxArrayString(5, columns));
+	movieSortDirection = new wxBitmapButton(movieFiltering, 4, scaleImage(wxBitmap("Resources/Gallery/UI/Alpha - Ascending.png", wxBITMAP_TYPE_PNG), (int)(34 * frameXRatio + 0.5), (int)(34 * frameYRatio + 0.5)), wxPoint(offsetX * frameX, offsetY * frameY + 59 * frameYRatio));
+	movieSortChoice = new wxChoice(movieFiltering, 5, wxPoint(movieSortDirection->GetPosition().x + movieSortDirection->GetSize().GetWidth() + 1 / 2 * (headingFontSize * offsetX) / 100 * frameX, (offsetY * frameY) + 60 * frameYRatio), wxDefaultSize, wxArrayString(5, columns));
 	movieSortChoice->SetSelection(0);
 	//Random
 	movieRandom->SetFont(headingFont);
