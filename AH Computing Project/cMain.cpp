@@ -95,17 +95,27 @@ void initializeMovies(int movieID) {
 		if (res->row_count > 0) //If the query returns results
 		{
 			while (row = mysql_fetch_row(res)) {
-				std::string testArr[8];
-				std::stringstream iss(row[7]); //Prepare string for splitting (Assign stringstream data type)
-				int counter = 0; //Initialise/reset counter
-				while (iss.good()) //While EOF not hit
+				std::string styles[8];
+				std::string features[4];
+				std::stringstream unsplitStyles(row[7]); //Prepare string for splitting (Assign stringstream data type)
+				int styleCounter = 0; //Initialise/reset counter
+				while (unsplitStyles.good()) //While EOF not hit
 				{
 					std::string singleLine;
-					getline(iss, singleLine, '/'); //Split into seperate styles ('/' is delimiter)
-					testArr[counter] = singleLine;
-					counter++;
+					getline(unsplitStyles, singleLine, '/'); //Split into seperate styles ('/' is delimiter)
+					styles[styleCounter] = singleLine;
+					styleCounter++;
 				}
-				movies[movieID] = new movie(new wxBitmap("Resources/Gallery/movies/" + std::string(row[1]) + "/Cover.png", wxBITMAP_TYPE_PNG), std::string(row[1]), std::string(row[2]), std::stoi(row[3]), std::string(row[4]), std::string(row[5]), testArr, std::string(row[8]));
+				std::stringstream unsplitFeats(row[6]); //Prepare string for splitting (Assign stringstream data type)
+				int featCounter = 0; //Initialise/reset counter
+				while (unsplitFeats.good()) //While EOF not hit
+				{
+					std::string singleLine;
+					getline(unsplitFeats, singleLine, '/'); //Split into seperate features ('/' is delimiter)
+					features[featCounter] = singleLine;
+					featCounter++;
+				}
+				movies[movieID] = new movie(new wxBitmap("Resources/Gallery/movies/" + std::string(row[1]) + "/Cover.png", wxBITMAP_TYPE_PNG), std::string(row[1]), std::string(row[2]), std::stoi(row[3]), std::string(row[4]), std::string(row[5]), features, styles, std::string(row[8]));
 			}
 		}
 	}
@@ -417,7 +427,7 @@ cMain::cMain() : wxFrame(nullptr, wxID_ANY, "RECOMMENGINE", wxPoint(0, 0))
 	mediaNB = new wxNotebook(basePanel, wxID_ANY, wxPoint(0, title->GetSize().GetHeight()), basePanel->GetSize(), wxNB_LEFT);
 	searchTypeNB = new wxNotebook(mediaNB, wxID_ANY, wxPoint(offsetX * frameX, 0));
 	movieFiltering = new wxScrolledWindow(searchTypeNB, wxID_ANY);
-	movieFiltering->SetScrollbars(0, 20, 0, (125 * frameYRatio));
+	movieFiltering->SetScrollbars(0, 20, 0, (126 * frameYRatio));
 	movieRandom = new wxPanel(searchTypeNB, wxID_ANY);
 
 	//Define dropdown options
@@ -459,6 +469,7 @@ cMain::cMain() : wxFrame(nullptr, wxID_ANY, "RECOMMENGINE", wxPoint(0, 0))
 
 	//Add UI elements
 	//Filtering
+	wxMessageBox(std::to_string(frameX) + ", " + std::to_string(frameY));
 	movieFiltering->SetFont(headingFont);
 	movieStyleHead = new wxStaticText(movieFiltering, wxID_ANY, "Style:", wxPoint(offsetX * frameX, offsetY * frameY));
 	movieStyleCombo = new wxChoice(movieFiltering, wxID_ANY, wxPoint(movieStyleHead->GetPosition().x + movieStyleHead->GetSize().GetWidth() + (headingFontSize * offsetX) / 100 * frameX, (offsetY * frameY) - 1), wxDefaultSize, wxArrayString(23, movieStyles));
@@ -470,25 +481,25 @@ cMain::cMain() : wxFrame(nullptr, wxID_ANY, "RECOMMENGINE", wxPoint(0, 0))
 	movieAgeCombo = new wxChoice(movieFiltering, wxID_ANY, wxPoint(movieAgeHead->GetPosition().x + movieAgeHead->GetSize().GetWidth() + (headingFontSize * offsetX) / 100 * frameX, (offsetY * frameY) - 1), wxDefaultSize, wxArrayString(6, movieAges));
 	movieAgeCombo->SetFont(btnFont);
 	movieReleaseHead = new wxStaticText(movieFiltering, wxID_ANY, "Release Date Range:", wxPoint(movieAgeCombo->GetPosition().x + movieAgeCombo->GetSize().GetWidth() + offsetX * frameX, offsetY * frameY));
-	movieReleaseStartVal = new wxChoice(movieFiltering, wxID_ANY, wxPoint(movieReleaseHead->GetPosition().x + movieReleaseHead->GetSize().GetWidth() + offsetX * frameX, (offsetY * frameY) - 1), wxDefaultSize, wxArrayString(54, years));
+	movieReleaseStartVal = new wxChoice(movieFiltering, wxID_ANY, wxPoint(movieReleaseHead->GetPosition().x + movieReleaseHead->GetSize().GetWidth() + (headingFontSize * offsetX) / 100 * frameX, (offsetY * frameY) - 1), wxDefaultSize, wxArrayString(54, years));
 	movieReleaseStartVal->SetFont(btnFont);
 	movieReleaseStartVal->SetStringSelection("ANY");
-	movieReleaseEndVal = new wxChoice(movieFiltering, wxID_ANY, wxPoint(movieReleaseStartVal->GetPosition().x + movieReleaseStartVal->GetSize().GetWidth() + offsetX * frameX, (offsetY * frameY) - 1), wxDefaultSize, wxArrayString(54, years));
+	movieReleaseEndVal = new wxChoice(movieFiltering, wxID_ANY, wxPoint(movieReleaseStartVal->GetPosition().x + movieReleaseStartVal->GetSize().GetWidth() + (headingFontSize * offsetX) / 100 * frameX, (offsetY * frameY) - 1), wxDefaultSize, wxArrayString(54, years));
 	movieReleaseEndVal->SetFont(btnFont);
 	movieReleaseEndVal->SetStringSelection("ANY");
 	movieDurationHead = new wxStaticText(movieFiltering, wxID_ANY, "Duration Range:", wxPoint(movieReleaseEndVal->GetPosition().x + movieReleaseEndVal->GetSize().GetWidth() + offsetX * frameX, offsetY * frameY));
-	movieDurationStartVal = new wxChoice(movieFiltering, wxID_ANY, wxPoint(movieDurationHead->GetPosition().x + movieDurationHead->GetSize().GetWidth() + offsetX * frameX, (offsetY * frameY) - 1), wxDefaultSize, wxArrayString(50, durations));
+	movieDurationStartVal = new wxChoice(movieFiltering, wxID_ANY, wxPoint(movieDurationHead->GetPosition().x + movieDurationHead->GetSize().GetWidth() + (headingFontSize * offsetX) / 100 * frameX, (offsetY * frameY) - 1), wxDefaultSize, wxArrayString(50, durations));
 	movieDurationStartVal->SetFont(btnFont);
 	movieDurationStartVal->SetStringSelection("ANY");
-	movieDurationEndVal = new wxChoice(movieFiltering, wxID_ANY, wxPoint(movieDurationStartVal->GetPosition().x + movieDurationStartVal->GetSize().GetWidth() + offsetX * frameX, (offsetY * frameY) - 1), wxDefaultSize, wxArrayString(50, durations));
+	movieDurationEndVal = new wxChoice(movieFiltering, wxID_ANY, wxPoint(movieDurationStartVal->GetPosition().x + movieDurationStartVal->GetSize().GetWidth() + (headingFontSize * offsetX) / 100 * frameX, (offsetY * frameY) - 1), wxDefaultSize, wxArrayString(50, durations));
 	movieDurationEndVal->SetFont(btnFont);
 	movieDurationEndVal->SetStringSelection("ANY");
-	movieApplyFiltersBtn = new wxButton(movieFiltering, 1, "APPLY", wxPoint(movieDurationEndVal->GetPosition().x + movieDurationEndVal->GetSize().GetWidth() + (4 * offsetX) * frameX, (offsetY * frameY) - 1));
+	movieApplyFiltersBtn = new wxButton(movieFiltering, 1, "APPLY", wxPoint(movieDurationEndVal->GetPosition().x + movieDurationEndVal->GetSize().GetWidth() + (3 * offsetX) * frameX, (offsetY * frameY) - 1));
 	movieApplyFiltersBtn->SetFont(btnFont);
 	movieResetFiltersBtn = new wxButton(movieFiltering, 2, "RESET", wxPoint(movieApplyFiltersBtn->GetPosition().x + movieApplyFiltersBtn->GetSize().GetWidth() + offsetX * frameX, (offsetY * frameY) - 1));
 	movieResetFiltersBtn->SetFont(btnFont);
 	movieSortDirection = new wxBitmapButton(movieFiltering, 4, scaleImage(wxBitmap("Resources/Gallery/UI/Alpha - Ascending.png", wxBITMAP_TYPE_PNG), 34, 34), wxPoint(offsetX * frameX, offsetY * frameY + 59));
-	movieSortChoice = new wxChoice(movieFiltering, 5, wxPoint(movieSortDirection->GetPosition().x + movieSortDirection->GetSize().GetWidth() + 1 / 2 * offsetX * frameX, (offsetY * frameY) + 60), wxDefaultSize, wxArrayString(5, columns));
+	movieSortChoice = new wxChoice(movieFiltering, 5, wxPoint(movieSortDirection->GetPosition().x + movieSortDirection->GetSize().GetWidth() + 1 / 2 * (headingFontSize * offsetX) / 100 * frameX, (offsetY * frameY) + 60), wxDefaultSize, wxArrayString(5, columns));
 	movieSortChoice->SetSelection(0);
 	//Random
 	movieRandom->SetFont(headingFont);
@@ -499,6 +510,7 @@ cMain::cMain() : wxFrame(nullptr, wxID_ANY, "RECOMMENGINE", wxPoint(0, 0))
 	movieDesc = new wxStaticText(movieRandom, wxID_ANY, "In the film directed by Ridley Scott, Rick Deckard, an ex - policeman, becomes a special agent with a mission to exterminate a group of violent androids.\nAs he starts getting deeper into his mission, he questions his own identity.", wxPoint(550, 200));
 	randomizerButton = new wxButton(movieRandom, 3, "NEW RANDOM MOVIE", wxPoint(100, 850));
 	moviePoster->SetFocus();
+
 	//Attach containers to pages of notebook and apply font
 	searchTypeNB->AddPage(movieFiltering, "FILTER");
 	searchTypeNB->AddPage(movieRandom, "RANDOM");
