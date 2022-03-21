@@ -469,7 +469,6 @@ cMain::cMain() : wxFrame(nullptr, wxID_ANY, "RECOMMENGINE", wxPoint(0, 0))
 
 	//Add UI elements
 	//Filtering
-	wxMessageBox(std::to_string(frameX) + ", " + std::to_string(frameY));
 	movieFiltering->SetFont(headingFont);
 	movieStyleHead = new wxStaticText(movieFiltering, wxID_ANY, "Style:", wxPoint(offsetX * frameX, offsetY * frameY));
 	movieStyleCombo = new wxChoice(movieFiltering, wxID_ANY, wxPoint(movieStyleHead->GetPosition().x + movieStyleHead->GetSize().GetWidth() + (headingFontSize * offsetX) / 100 * frameX, (offsetY * frameY) - 1), wxDefaultSize, wxArrayString(23, movieStyles));
@@ -498,7 +497,7 @@ cMain::cMain() : wxFrame(nullptr, wxID_ANY, "RECOMMENGINE", wxPoint(0, 0))
 	movieApplyFiltersBtn->SetFont(btnFont);
 	movieResetFiltersBtn = new wxButton(movieFiltering, 2, "RESET", wxPoint(movieApplyFiltersBtn->GetPosition().x + movieApplyFiltersBtn->GetSize().GetWidth() + offsetX * frameX, (offsetY * frameY) - 1));
 	movieResetFiltersBtn->SetFont(btnFont);
-	movieSortDirection = new wxBitmapButton(movieFiltering, 4, scaleImage(wxBitmap("Resources/Gallery/UI/Alpha - Ascending.png", wxBITMAP_TYPE_PNG), 34, 34), wxPoint(offsetX * frameX, offsetY * frameY + 59));
+	movieSortDirection = new wxBitmapButton(movieFiltering, 4, scaleImage(wxBitmap("Resources/Gallery/UI/Alpha - Ascending.png", wxBITMAP_TYPE_PNG), (int)(34 * frameXRatio + 0.5), (int)(34 * frameYRatio + 0.5)), wxPoint(offsetX * frameX, offsetY * frameY + 59));
 	movieSortChoice = new wxChoice(movieFiltering, 5, wxPoint(movieSortDirection->GetPosition().x + movieSortDirection->GetSize().GetWidth() + 1 / 2 * (headingFontSize * offsetX) / 100 * frameX, (offsetY * frameY) + 60), wxDefaultSize, wxArrayString(5, columns));
 	movieSortChoice->SetSelection(0);
 	//Random
