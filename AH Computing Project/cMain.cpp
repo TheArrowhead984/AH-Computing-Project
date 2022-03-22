@@ -25,8 +25,9 @@ MYSQL_ROW row;
 MYSQL_RES *res;
 
 //Scaling values
-float offsetX = 0.01;
-float offsetY = 0.035;
+float offsetY = 49.0f;
+float choiceOffset = 5.0f;
+float headOffset = 25.0f;
 int titleFontSize = 30;
 int NBfontSize = 20;
 int headingFontSize = 20;
@@ -179,7 +180,7 @@ void cMain::movieResetFilters(wxCommandEvent &evt)
 	movieSortDataType = "Alpha";
 	movieSort = false;
 	movieSortType = true;
-	movieSortDirection->SetBitmap(scaleImage(wxBitmap("Resources/Gallery/UI/" + movieSortDataType + " - Ascending.png", wxBITMAP_TYPE_PNG), 34, 34));
+	movieSortDirection->SetBitmap(scaleImage(wxBitmap("Resources/Gallery/UI/" + movieSortDataType + " - Ascending.png", wxBITMAP_TYPE_PNG), (int)(34 * frameXRatio + 0.5), (int)(34 * frameYRatio + 0.5)));
 	runFilterQuery("movies", movieCovers, movieInfo); //Run filter query without any filters applied
 }
 
@@ -207,7 +208,7 @@ void cMain::movieStyleClicked(wxCommandEvent &evt)
 	movieSortDataType = "Alpha";
 	movieSort = false;
 	movieSortType = true;
-	movieSortDirection->SetBitmap(scaleImage(wxBitmap("Resources/Gallery/UI/" + movieSortDataType + " - Ascending.png", wxBITMAP_TYPE_PNG), 34, 34));
+	movieSortDirection->SetBitmap(scaleImage(wxBitmap("Resources/Gallery/UI/" + movieSortDataType + " - Ascending.png", wxBITMAP_TYPE_PNG), (int)(34 * frameXRatio + 0.5), (int)(34 * frameYRatio + 0.5)));
 	runFilterQuery("movies", movieCovers, movieInfo, true, false, false, false, false, btn->GetLabel()); //Filter for the style the user selected
 }
 
@@ -220,11 +221,11 @@ void cMain::newRandomMovie(wxCommandEvent &evt)
 void cMain::changeSortDirection(wxCommandEvent &evt)
 {
 	if (movieSort) {
-		movieSortDirection->SetBitmap(scaleImage(wxBitmap("Resources/Gallery/UI/" + movieSortDataType + " - Ascending.png", wxBITMAP_TYPE_PNG), 34, 34));
+		movieSortDirection->SetBitmap(scaleImage(wxBitmap("Resources/Gallery/UI/" + movieSortDataType + " - Ascending.png", wxBITMAP_TYPE_PNG), (int)(34 * frameXRatio + 0.5), (int)(34 * frameYRatio + 0.5)));
 		movieSort = false;
 	}
 	else {
-		movieSortDirection->SetBitmap(scaleImage(wxBitmap("Resources/Gallery/UI/" + movieSortDataType + " - Descending.png", wxBITMAP_TYPE_PNG), 34, 34));
+		movieSortDirection->SetBitmap(scaleImage(wxBitmap("Resources/Gallery/UI/" + movieSortDataType + " - Descending.png", wxBITMAP_TYPE_PNG), (int)(34 * frameXRatio + 0.5), (int)(34 * frameYRatio + 0.5)));
 		movieSort = true;
 	}
 }
@@ -238,10 +239,10 @@ void cMain::sortChoiceMade(wxCommandEvent &evt)
 		movieSortDataType = "Number";
 	}
 	if (movieSort) {
-		movieSortDirection->SetBitmap(scaleImage(wxBitmap("Resources/Gallery/UI/" + movieSortDataType + " - Descending.png", wxBITMAP_TYPE_PNG), 34, 34));
+		movieSortDirection->SetBitmap(scaleImage(wxBitmap("Resources/Gallery/UI/" + movieSortDataType + " - Descending.png", wxBITMAP_TYPE_PNG), (int)(34 * frameXRatio + 0.5), (int)(34 * frameYRatio + 0.5)));
 	}
 	else {
-		movieSortDirection->SetBitmap(scaleImage(wxBitmap("Resources/Gallery/UI/" + movieSortDataType + " - Ascending.png", wxBITMAP_TYPE_PNG), 34, 34));
+		movieSortDirection->SetBitmap(scaleImage(wxBitmap("Resources/Gallery/UI/" + movieSortDataType + " - Ascending.png", wxBITMAP_TYPE_PNG), (int)(34 * frameXRatio + 0.5), (int)(34 * frameYRatio + 0.5)));
 	}
 }
 
@@ -355,7 +356,7 @@ void cMain::runRandomQuery(std::string mediaType, bool random, int movieID)
 	movieTitle->SetLabel(movies[movieID]->title + " (" + std::to_string(movies[movieID]->releaseDate) + ")"); //Set the text to the name of the movie
 	moviePoster->SetBitmap(scaleImage(*movies[movieID]->cover, 500, 700)); //Load the poster
 	movieDesc->SetLabel("The " + mediaType.substr(0, mediaType.size() - 1) + " directed by " + movies[movieID]->director + ", follows " + movies[movieID]->description); //Update description
-	movieDesc->Wrap(frameX - (movieDesc->GetPosition().x + (offsetX * frameX))); //Wraptext
+	movieDesc->Wrap(frameX - (movieDesc->GetPosition().x + (headOffset * frameXRatio))); //Wraptext
 	movieRandom->Fit(); //Update window after wrapping text
 	std::stringstream iss(); //Prepare string for splitting (Assign stringstream data type)
 	int counter = 0; //Initialise/reset counter
@@ -370,7 +371,7 @@ void cMain::runRandomQuery(std::string mediaType, bool random, int movieID)
 		//If this is the first button to be added:
 		if (counter == 0)
 		{
-			styleList[counter] = new wxButton(movieRandom, counter + (noMovies + 1), movies[movieID]->styles[i], wxPoint(movieTitle->GetPosition().x + movieTitle->GetSize().GetWidth() + ((frameX - (offsetX * frameX) - movieTitle->GetSize().GetWidth()) / 2), 50)); //Add button basing position off of size and pos of the title of the film
+			styleList[counter] = new wxButton(movieRandom, counter + (noMovies + 1), movies[movieID]->styles[i], wxPoint(movieTitle->GetPosition().x + movieTitle->GetSize().GetWidth() + ((frameX - (headOffset * frameXRatio) - movieTitle->GetSize().GetWidth()) / 2), 50)); //Add button basing position off of size and pos of the title of the film
 		}
 		else
 		{
@@ -403,7 +404,7 @@ cMain::cMain() : wxFrame(nullptr, wxID_ANY, "RECOMMENGINE", wxPoint(0, 0))
 	frameX = cMain::GetSize().GetWidth();
 	frameY = cMain::GetSize().GetHeight();
 	//Calculate ratio (scaling multiplier)
-	frameXRatio = frameX / 2560.0;
+	frameXRatio = (frameX - 40) / (2560.0-40.0);
 	frameYRatio = frameY / 1400.0;
 	if (frameX != 2560) { //If the user has a different screen size
 		//Adjust default cover dimensions to account for the difference in screen size
@@ -425,7 +426,7 @@ cMain::cMain() : wxFrame(nullptr, wxID_ANY, "RECOMMENGINE", wxPoint(0, 0))
 	title->SetFont(titleFont);
 	title->SetBackgroundColour("Grey");
 	mediaNB = new wxNotebook(basePanel, wxID_ANY, wxPoint(0, title->GetSize().GetHeight()), basePanel->GetSize(), wxNB_LEFT);
-	searchTypeNB = new wxNotebook(mediaNB, wxID_ANY, wxPoint(offsetX * frameX, 0));
+	searchTypeNB = new wxNotebook(mediaNB, wxID_ANY, wxPoint(headOffset * frameXRatio, 0));
 	movieFiltering = new wxScrolledWindow(searchTypeNB, wxID_ANY);
 	movieFiltering->SetScrollbars(0, 20, 0, 127 * frameYRatio);
 	movieRandom = new wxPanel(searchTypeNB, wxID_ANY);
@@ -470,35 +471,35 @@ cMain::cMain() : wxFrame(nullptr, wxID_ANY, "RECOMMENGINE", wxPoint(0, 0))
 	//Add UI elements
 	//Filtering
 	movieFiltering->SetFont(headingFont);
-	movieStyleHead = new wxStaticText(movieFiltering, wxID_ANY, "Style:", wxPoint(offsetX * frameX, offsetY * frameY));
-	movieStyleCombo = new wxChoice(movieFiltering, wxID_ANY, wxPoint(movieStyleHead->GetPosition().x + movieStyleHead->GetSize().GetWidth() + (headingFontSize * offsetX) / 100 * frameX, (offsetY * frameY) - 1), wxDefaultSize, wxArrayString(23, movieStyles));
+	movieStyleHead = new wxStaticText(movieFiltering, wxID_ANY, "Style:", wxPoint(headOffset * frameXRatio, offsetY * frameYRatio));
+	movieStyleCombo = new wxChoice(movieFiltering, wxID_ANY, wxPoint(movieStyleHead->GetPosition().x + movieStyleHead->GetSize().GetWidth() + choiceOffset * frameXRatio, (offsetY * frameYRatio) - 1), wxDefaultSize, wxArrayString(23, movieStyles));
 	movieStyleCombo->SetFont(btnFont);
-	movieFeatureHead = new wxStaticText(movieFiltering, wxID_ANY, "Outstanding Element:", wxPoint(movieStyleCombo->GetPosition().x + movieStyleCombo->GetSize().GetWidth() + offsetX * frameX, offsetY * frameY));
-	movieFeatureCombo = new wxChoice(movieFiltering, wxID_ANY, wxPoint(movieFeatureHead->GetPosition().x + movieFeatureHead->GetSize().GetWidth() + (headingFontSize * offsetX) / 100 * frameX, (offsetY * frameY) - 1), wxDefaultSize, wxArrayString(7, movieFeatures));
+	movieFeatureHead = new wxStaticText(movieFiltering, wxID_ANY, "Outstanding Element:", wxPoint(movieStyleCombo->GetPosition().x + movieStyleCombo->GetSize().GetWidth() + headOffset * frameXRatio, offsetY * frameYRatio));
+	movieFeatureCombo = new wxChoice(movieFiltering, wxID_ANY, wxPoint(movieFeatureHead->GetPosition().x + movieFeatureHead->GetSize().GetWidth() + choiceOffset * frameXRatio, (offsetY * frameYRatio) - 1), wxDefaultSize, wxArrayString(7, movieFeatures));
 	movieFeatureCombo->SetFont(btnFont);
-	movieAgeHead = new wxStaticText(movieFiltering, wxID_ANY, "Age Rating:", wxPoint(movieFeatureCombo->GetPosition().x + movieFeatureCombo->GetSize().GetWidth() + offsetX * frameX, offsetY * frameY));
-	movieAgeCombo = new wxChoice(movieFiltering, wxID_ANY, wxPoint(movieAgeHead->GetPosition().x + movieAgeHead->GetSize().GetWidth() + (headingFontSize * offsetX) / 100 * frameX, (offsetY * frameY) - 1), wxDefaultSize, wxArrayString(6, movieAges));
+	movieAgeHead = new wxStaticText(movieFiltering, wxID_ANY, "Age Rating:", wxPoint(movieFeatureCombo->GetPosition().x + movieFeatureCombo->GetSize().GetWidth() + headOffset * frameXRatio, offsetY * frameYRatio));
+	movieAgeCombo = new wxChoice(movieFiltering, wxID_ANY, wxPoint(movieAgeHead->GetPosition().x + movieAgeHead->GetSize().GetWidth() + choiceOffset * frameXRatio, (offsetY * frameYRatio) - 1), wxDefaultSize, wxArrayString(6, movieAges));
 	movieAgeCombo->SetFont(btnFont);
-	movieReleaseHead = new wxStaticText(movieFiltering, wxID_ANY, "Release Date Range:", wxPoint(movieAgeCombo->GetPosition().x + movieAgeCombo->GetSize().GetWidth() + offsetX * frameX, offsetY * frameY));
-	movieReleaseStartVal = new wxChoice(movieFiltering, wxID_ANY, wxPoint(movieReleaseHead->GetPosition().x + movieReleaseHead->GetSize().GetWidth() + (headingFontSize * offsetX) / 100 * frameX, (offsetY * frameY) - 1), wxDefaultSize, wxArrayString(54, years));
+	movieReleaseHead = new wxStaticText(movieFiltering, wxID_ANY, "Release Date Range:", wxPoint(movieAgeCombo->GetPosition().x + movieAgeCombo->GetSize().GetWidth() + headOffset * frameXRatio, offsetY * frameYRatio));
+	movieReleaseStartVal = new wxChoice(movieFiltering, wxID_ANY, wxPoint(movieReleaseHead->GetPosition().x + movieReleaseHead->GetSize().GetWidth() + choiceOffset * frameXRatio, (offsetY * frameYRatio) - 1), wxDefaultSize, wxArrayString(54, years));
 	movieReleaseStartVal->SetFont(btnFont);
 	movieReleaseStartVal->SetStringSelection("ANY");
-	movieReleaseEndVal = new wxChoice(movieFiltering, wxID_ANY, wxPoint(movieReleaseStartVal->GetPosition().x + movieReleaseStartVal->GetSize().GetWidth() + (headingFontSize * offsetX) / 100 * frameX, (offsetY * frameY) - 1), wxDefaultSize, wxArrayString(54, years));
+	movieReleaseEndVal = new wxChoice(movieFiltering, wxID_ANY, wxPoint(movieReleaseStartVal->GetPosition().x + movieReleaseStartVal->GetSize().GetWidth() + choiceOffset * frameXRatio, (offsetY * frameYRatio) - 1), wxDefaultSize, wxArrayString(54, years));
 	movieReleaseEndVal->SetFont(btnFont);
 	movieReleaseEndVal->SetStringSelection("ANY");
-	movieDurationHead = new wxStaticText(movieFiltering, wxID_ANY, "Duration Range:", wxPoint(movieReleaseEndVal->GetPosition().x + movieReleaseEndVal->GetSize().GetWidth() + offsetX * frameX, offsetY * frameY));
-	movieDurationStartVal = new wxChoice(movieFiltering, wxID_ANY, wxPoint(movieDurationHead->GetPosition().x + movieDurationHead->GetSize().GetWidth() + (headingFontSize * offsetX) / 100 * frameX, (offsetY * frameY) - 1), wxDefaultSize, wxArrayString(50, durations));
+	movieDurationHead = new wxStaticText(movieFiltering, wxID_ANY, "Duration Range:", wxPoint(movieReleaseEndVal->GetPosition().x + movieReleaseEndVal->GetSize().GetWidth() + headOffset * frameXRatio, offsetY * frameYRatio));
+	movieDurationStartVal = new wxChoice(movieFiltering, wxID_ANY, wxPoint(movieDurationHead->GetPosition().x + movieDurationHead->GetSize().GetWidth() + choiceOffset * frameXRatio, (offsetY * frameYRatio) - 1), wxDefaultSize, wxArrayString(50, durations));
 	movieDurationStartVal->SetFont(btnFont);
 	movieDurationStartVal->SetStringSelection("ANY");
-	movieDurationEndVal = new wxChoice(movieFiltering, wxID_ANY, wxPoint(movieDurationStartVal->GetPosition().x + movieDurationStartVal->GetSize().GetWidth() + (headingFontSize * offsetX) / 100 * frameX, (offsetY * frameY) - 1), wxDefaultSize, wxArrayString(50, durations));
+	movieDurationEndVal = new wxChoice(movieFiltering, wxID_ANY, wxPoint(movieDurationStartVal->GetPosition().x + movieDurationStartVal->GetSize().GetWidth() + choiceOffset * frameXRatio, (offsetY * frameYRatio) - 1), wxDefaultSize, wxArrayString(50, durations));
 	movieDurationEndVal->SetFont(btnFont);
 	movieDurationEndVal->SetStringSelection("ANY");
-	movieApplyFiltersBtn = new wxButton(movieFiltering, 1, "APPLY", wxPoint(movieDurationEndVal->GetPosition().x + movieDurationEndVal->GetSize().GetWidth() + (3 * offsetX) * frameX, (offsetY * frameY) - 1));
+	movieApplyFiltersBtn = new wxButton(movieFiltering, 1, "APPLY", wxPoint(movieDurationEndVal->GetPosition().x + movieDurationEndVal->GetSize().GetWidth() + (3.0 * headOffset) * frameXRatio, (offsetY * frameYRatio) - 1));
 	movieApplyFiltersBtn->SetFont(btnFont);
-	movieResetFiltersBtn = new wxButton(movieFiltering, 2, "RESET", wxPoint(movieApplyFiltersBtn->GetPosition().x + movieApplyFiltersBtn->GetSize().GetWidth() + offsetX * frameX, (offsetY * frameY) - 1));
+	movieResetFiltersBtn = new wxButton(movieFiltering, 2, "RESET", wxPoint(movieApplyFiltersBtn->GetPosition().x + movieApplyFiltersBtn->GetSize().GetWidth() + headOffset * frameXRatio, (offsetY * frameYRatio) - 1));
 	movieResetFiltersBtn->SetFont(btnFont);
-	movieSortDirection = new wxBitmapButton(movieFiltering, 4, scaleImage(wxBitmap("Resources/Gallery/UI/Alpha - Ascending.png", wxBITMAP_TYPE_PNG), (int)(34 * frameXRatio + 0.5), (int)(34 * frameYRatio + 0.5)), wxPoint(offsetX * frameX, offsetY * frameY + 59 * frameYRatio));
-	movieSortChoice = new wxChoice(movieFiltering, 5, wxPoint(movieSortDirection->GetPosition().x + movieSortDirection->GetSize().GetWidth() + 1 / 2 * (headingFontSize * offsetX) / 100 * frameX, (offsetY * frameY) + 60 * frameYRatio), wxDefaultSize, wxArrayString(5, columns));
+	movieSortDirection = new wxBitmapButton(movieFiltering, 4, scaleImage(wxBitmap("Resources/Gallery/UI/Alpha - Ascending.png", wxBITMAP_TYPE_PNG), (int)(34 * frameXRatio + 0.5), (int)(34 * frameYRatio + 0.5)), wxPoint(headOffset * frameXRatio, offsetY * frameYRatio + 59 * frameYRatio));
+	movieSortChoice = new wxChoice(movieFiltering, 5, wxPoint(movieSortDirection->GetPosition().x + movieSortDirection->GetSize().GetWidth() + (1.0 / 2.0) * choiceOffset * frameXRatio, (offsetY * frameYRatio) + 60 * frameYRatio), wxDefaultSize, wxArrayString(5, columns));
 	movieSortChoice->SetSelection(0);
 	//Random
 	movieRandom->SetFont(headingFont);
