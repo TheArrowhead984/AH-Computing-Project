@@ -419,8 +419,8 @@ cMain::cMain() : wxFrame(nullptr, wxID_ANY, "RECOMMENGINE", wxPoint(0, 0))
 	//Define fonts
 	wxFont titleFont(wxFontInfo(titleFontSize * frameXRatio).Bold());
 	wxFont NBfont(wxFontInfo(NBfontSize * frameXRatio).Bold());
-	wxFont headingFont(wxFontInfo(headingFontSize * frameXRatio).Light());
-	wxFont btnFont(wxFontInfo(btnFontSize * frameXRatio).Light());
+	wxFont headingFont(wxFontInfo(headingFontSize * frameXRatio));
+	wxFont btnFont(wxFontInfo(btnFontSize * frameXRatio));
 
 	//Establish containers
 	basePanel = new wxPanel(this, wxID_ANY, wxDefaultPosition, cMain::GetSize());
@@ -500,7 +500,7 @@ cMain::cMain() : wxFrame(nullptr, wxID_ANY, "RECOMMENGINE", wxPoint(0, 0))
 	movieApplyFiltersBtn->SetFont(btnFont);
 	movieResetFiltersBtn = new wxButton(movieFiltering, 2, "RESET", wxPoint(movieApplyFiltersBtn->GetPosition().x + movieApplyFiltersBtn->GetSize().GetWidth() + headOffset * frameXRatio, (offsetY * frameYRatio) - 1));
 	movieResetFiltersBtn->SetFont(btnFont);
-	movieSortDirection = new wxBitmapButton(movieFiltering, 4, scaleImage(wxBitmap("Resources/Gallery/UI/Alpha - Ascending.png", wxBITMAP_TYPE_PNG), (int)(34 * frameXRatio + 0.5), (int)(34 * frameYRatio + 0.5)), wxPoint(headOffset * frameXRatio, offsetY * frameYRatio + 58 * frameYRatio));
+	movieSortDirection = new wxBitmapButton(movieFiltering, 4, scaleImage(wxBitmap("Resources/Gallery/UI/Alpha - Ascending.png", wxBITMAP_TYPE_PNG), (int)(34 * frameXRatio + 0.5), (int)(34 * frameYRatio + 0.5)), wxPoint(headOffset * frameXRatio, offsetY * frameYRatio + (60 * frameYRatio) - 1));
 	movieSortChoice = new wxChoice(movieFiltering, 5, wxPoint(movieSortDirection->GetPosition().x + movieSortDirection->GetSize().GetWidth() + (1.0 / 2.0) * choiceOffset * frameXRatio, (offsetY * frameYRatio) + 60 * frameYRatio), wxDefaultSize, wxArrayString(5, columns));
 	movieSortChoice->SetSelection(0);
 	//Random
