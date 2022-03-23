@@ -315,7 +315,7 @@ void cMain::runFilterQuery(std::string mediaType, wxBitmapButton *mediaTypeCover
 					movieInfoStr = movies[std::stoi(row[0])]->duration;
 				}
 				mediaTypeInfo[counter] = new wxStaticText(movieFiltering, wxID_ANY, movieInfoStr, wxPoint(mediaTypeCovers[counter]->GetPosition().x + (mediaTypeCovers[counter]->GetSize().GetWidth()) / 2, (((floor(counter / 10)) * (coverY + 100 * frameYRatio)) + (200 * frameYRatio + coverY))), wxDefaultSize, wxALIGN_CENTRE_HORIZONTAL);
-				mediaTypeInfo[counter]->SetFont(wxFontInfo(18 * frameXRatio).Light()); //Scale text slightly
+				mediaTypeInfo[counter]->SetFont(wxFontInfo(20 * frameXRatio)); //Scale text slightly
 				mediaTypeInfo[counter]->Wrap(coverX); //Wraptext
 				mediaTypeInfo[counter]->SetPosition(wxPoint(mediaTypeInfo[counter]->GetPosition().x - (mediaTypeInfo[counter]->GetSize().GetWidth()) / 2, mediaTypeInfo[counter]->GetPosition().y + (15 * frameYRatio))); //Center text under cover
 				counter++;
@@ -403,9 +403,11 @@ cMain::cMain() : wxFrame(nullptr, wxID_ANY, "RECOMMENGINE", wxPoint(0, 0))
 	//Get frame size for scaling
 	frameX = cMain::GetSize().GetWidth();
 	frameY = cMain::GetSize().GetHeight();
+
 	//Calculate ratio (scaling multiplier)
-	frameXRatio = (frameX - 40) / (2560.0-40.0);
-	frameYRatio = frameY / 1400.0;
+	frameXRatio = (frameX - 40) / (2560.0 - 40.0); //Take 40 from both values as that's the fixed width of the scrollbar
+	frameYRatio = frameY / 1400.0; //40 is taken off of my screen resolution (1440) here since the taskbar always takes up 40px
+
 	if (frameX != 2560) { //If the user has a different screen size
 		//Adjust default cover dimensions to account for the difference in screen size
 		float tempCoverX = round(coverX * frameXRatio);
