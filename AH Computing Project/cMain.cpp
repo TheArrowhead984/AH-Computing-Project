@@ -294,7 +294,7 @@ void cMain::runFilterQuery(std::string mediaType, wxBitmapButton *mediaTypeCover
 				//Define default cover dimensions
 				cover = scaleImage(cover, coverX, coverY); //Scale the cover to the correct dimensions
 				//Add each cover as a button, with an ID that is equal to the movie's ID + an int (To avoid interference with other buttons and allow for the movieID to be calculated using the ID of the object)
-				mediaTypeCovers[counter] = new wxBitmapButton(movieFiltering, std::stoi(row[0]) + 6, cover, wxPoint(((counter * (coverX + (10 * frameXRatio))) - ((floor(counter / 10)) * 10 * (coverX + (10 * frameXRatio))) + 5 * frameXRatio), (((floor(counter / 10)) * (coverY + 100 * frameYRatio)) + (200) * frameYRatio)), wxDefaultSize, wxBORDER_NONE);
+				mediaTypeCovers[counter] = new wxBitmapButton(movieFiltering, std::stoi(row[0]) + 6, cover, wxPoint(((counter * (coverX + (10 * frameXRatio))) - ((floor(counter / 10)) * 10 * (coverX + (10 * frameXRatio))) + 15 * frameXRatio), (((floor(counter / 10)) * (coverY + 100 * frameYRatio)) + (200) * frameYRatio)), wxDefaultSize, wxBORDER_NONE);
 				//Bind the imageClicked function to each button
 				mediaTypeCovers[counter]->Bind(wxEVT_BUTTON, &cMain::movieImageClicked, this);
 				std::string movieInfoStr = movies[std::stoi(row[0])]->title;
@@ -496,11 +496,11 @@ cMain::cMain() : wxFrame(nullptr, wxID_ANY, "RECOMMENGINE", wxPoint(0, 0))
 	movieDurationEndVal = new wxChoice(movieFiltering, wxID_ANY, wxPoint(movieDurationStartVal->GetPosition().x + movieDurationStartVal->GetSize().GetWidth() + choiceOffset * frameXRatio, (offsetY * frameYRatio) - 1), wxDefaultSize, wxArrayString(50, durations));
 	movieDurationEndVal->SetFont(btnFont);
 	movieDurationEndVal->SetStringSelection("ANY");
-	movieApplyFiltersBtn = new wxButton(movieFiltering, 1, "APPLY", wxPoint(movieDurationEndVal->GetPosition().x + movieDurationEndVal->GetSize().GetWidth() + (3.0 * headOffset) * frameXRatio, (offsetY * frameYRatio) - 1));
+	movieApplyFiltersBtn = new wxButton(movieFiltering, 1, "APPLY", wxPoint(movieDurationEndVal->GetPosition().x + movieDurationEndVal->GetSize().GetWidth() + (8.0 * frameXRatio * headOffset) * frameXRatio, (offsetY * frameYRatio) - 1));
 	movieApplyFiltersBtn->SetFont(btnFont);
 	movieResetFiltersBtn = new wxButton(movieFiltering, 2, "RESET", wxPoint(movieApplyFiltersBtn->GetPosition().x + movieApplyFiltersBtn->GetSize().GetWidth() + headOffset * frameXRatio, (offsetY * frameYRatio) - 1));
 	movieResetFiltersBtn->SetFont(btnFont);
-	movieSortDirection = new wxBitmapButton(movieFiltering, 4, scaleImage(wxBitmap("Resources/Gallery/UI/Alpha - Ascending.png", wxBITMAP_TYPE_PNG), (int)(34 * frameXRatio + 0.5), (int)(34 * frameYRatio + 0.5)), wxPoint(headOffset * frameXRatio, offsetY * frameYRatio + 59 * frameYRatio));
+	movieSortDirection = new wxBitmapButton(movieFiltering, 4, scaleImage(wxBitmap("Resources/Gallery/UI/Alpha - Ascending.png", wxBITMAP_TYPE_PNG), (int)(34 * frameXRatio + 0.5), (int)(34 * frameYRatio + 0.5)), wxPoint(headOffset * frameXRatio, offsetY * frameYRatio + 58 * frameYRatio));
 	movieSortChoice = new wxChoice(movieFiltering, 5, wxPoint(movieSortDirection->GetPosition().x + movieSortDirection->GetSize().GetWidth() + (1.0 / 2.0) * choiceOffset * frameXRatio, (offsetY * frameYRatio) + 60 * frameYRatio), wxDefaultSize, wxArrayString(5, columns));
 	movieSortChoice->SetSelection(0);
 	//Random
