@@ -97,6 +97,7 @@ StyleCopReport.xml
 *.pidb
 *.svclog
 *.scc
+.sln #To ignore solution file so laptop isn't bust
 
 # Chutzpah Test files
 _Chutzpah*
