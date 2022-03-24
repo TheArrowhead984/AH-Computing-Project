@@ -418,7 +418,7 @@ cMain::cMain() : wxFrame(nullptr, wxID_ANY, "RECOMMENGINE", wxPoint(0, 0))
 	//Define fonts
 	wxFont titleFont(wxFontInfo(titleFontSize * frameXRatio).Bold());
 	wxFont NBfont(wxFontInfo(NBfontSize * frameXRatio).Bold());
-	wxFont headingFont(wxFontInfo(headingFontSize * frameXRatio));
+	wxFont headingFont(wxFontInfo(floor(headingFontSize * frameXRatio)));
 	wxFont btnFont(wxFontInfo(btnFontSize * frameXRatio));
 
 	//Establish containers
