@@ -49,6 +49,7 @@ public:
 	void movieResetFilters(wxCommandEvent &evt);
 	void movieImageClicked(wxCommandEvent &evt);
 	void movieStyleClicked(wxCommandEvent &evt);
+	void movieFeatureClicked(wxCommandEvent &evt);
 	void newRandomMovie(wxCommandEvent &evt);
 	void changeSortDirection(wxCommandEvent &evt);
 	void sortChoiceMade(wxCommandEvent &evt);

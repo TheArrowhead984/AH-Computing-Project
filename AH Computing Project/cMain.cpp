@@ -48,9 +48,11 @@ bool movieSortType = true; //boolean for what data type is being sorted (int (fa
 int noMovies = 0;
 int noResults = 0;
 int noStyles = 0;
+int noFeatures = 0;
 wxBitmapButton *movieCovers[100];
 wxStaticText *movieInfo[100];
 wxButton *styleList[8];
+wxButton *featureList[4];
 int previousMovie = 0;
 movie *movies[100];
 
@@ -196,7 +198,6 @@ void cMain::movieStyleClicked(wxCommandEvent &evt)
 {
 	searchTypeNB->ChangeSelection(0);
 	wxButton *btn = static_cast<wxButton *>(evt.GetEventObject()); //Get a reference to the button that triggered this event
-
 	movieStyleCombo->SetSelection(movieStyleCombo->FindString(btn->GetLabel())); //Set selected style filter to the text on the button the user clicked
 	movieFeatureCombo->SetSelection(0);
 	movieAgeCombo->SetSelection(0);
@@ -210,6 +211,25 @@ void cMain::movieStyleClicked(wxCommandEvent &evt)
 	movieSortType = true;
 	movieSortDirection->SetBitmap(scaleImage(wxBitmap("Resources/Gallery/UI/" + movieSortDataType + " - Ascending.png", wxBITMAP_TYPE_PNG), (int)(34 * frameXRatio + 0.5), (int)(34 * frameYRatio + 0.5)));
 	runFilterQuery("movies", movieCovers, movieInfo, true, false, false, false, false, btn->GetLabel()); //Filter for the style the user selected
+}
+
+void cMain::movieFeatureClicked(wxCommandEvent &evt)
+{
+	searchTypeNB->ChangeSelection(0);
+	wxButton *btn = static_cast<wxButton *>(evt.GetEventObject()); //Get a reference to the button that triggered this event
+	movieStyleCombo->SetSelection(0);
+	movieFeatureCombo->SetSelection(movieFeatureCombo->FindString(btn->GetLabel())); //Set selected feature filter to the text on the button the user clicked
+	movieAgeCombo->SetSelection(0);
+	movieReleaseStartVal->SetSelection(0);
+	movieReleaseEndVal->SetSelection(0);
+	movieDurationStartVal->SetSelection(0);
+	movieDurationEndVal->SetSelection(0);
+	movieSortChoice->SetSelection(0);
+	movieSortDataType = "Alpha";
+	movieSort = false;
+	movieSortType = true;
+	movieSortDirection->SetBitmap(scaleImage(wxBitmap("Resources/Gallery/UI/" + movieSortDataType + " - Ascending.png", wxBITMAP_TYPE_PNG), (int)(34 * frameXRatio + 0.5), (int)(34 * frameYRatio + 0.5)));
+	runFilterQuery("movies", movieCovers, movieInfo, false, true, false, false, false, "", btn->GetLabel()); //Filter for the style the user selected
 }
 
 /* <-----Procedure that generates a random movie----->*/
@@ -353,12 +373,19 @@ void cMain::runRandomQuery(std::string mediaType, bool random, int movieID)
 	{
 		delete styleList[i]; //Delete style tag buttons one by one
 	}
-	movieTitle->SetLabel(movies[movieID]->title + " (" + std::to_string(movies[movieID]->releaseDate) + ")"); //Set the text to the name of the movie
+	for (int i = 0; i < noFeatures; i++) //Loop for the amount of style tags the previous movie had
+	{
+		delete featureList[i]; //Delete style tag buttons one by one
+	}
+	movieTitle->SetLabel(movies[movieID]->title + " (" + std::to_string(movies[movieID]->releaseDate) + ") - " + std::to_string(stoi(movies[movieID]->duration.substr(0, 2))) + (stoi(movies[movieID]->duration.substr(0, 2)) == 1 ? "hr " : "hrs ") + std::to_string(stoi(movies[movieID]->duration.substr(3, 2))) + (stoi(movies[movieID]->duration.substr(3, 2)) == 1 ? "min " : "mins ")); //Set the text to the name of the movie
 	moviePoster->SetBitmap(scaleImage(*movies[movieID]->cover, 500 * frameXRatio, 700 * frameYRatio)); //Load the poster
 	movieDesc->SetLabel("The " + mediaType.substr(0, mediaType.size() - 1) + " directed by " + movies[movieID]->director + ", follows " + movies[movieID]->description); //Update description
 	movieDesc->Wrap(frameX - (movieDesc->GetPosition().x + 2 * (headOffset * frameXRatio))); //Wraptext
 	movieRandom->Fit(); //Update window after wrapping text
-	int counter = 0; //Initialise/reset counter
+
+	/* <-----Add style buttons----->*/
+
+	int styleCounter = 0; //Initialise/reset counter
 	noStyles = 8;
 	for (int i = 0; i < 8; i++) {
 		if (movies[movieID]->styles[i] == "") {
@@ -368,26 +395,58 @@ void cMain::runRandomQuery(std::string mediaType, bool random, int movieID)
 	for (int i = 0; i < noStyles; i++) //
 	{
 		//If this is the first button to be added:
-		if (counter == 0)
+		if (styleCounter == 0)
 		{
-			styleList[counter] = new wxButton(movieRandom, counter + (noMovies + 1), movies[movieID]->styles[i], wxPoint(movieTitle->GetPosition().x + movieTitle->GetSize().GetWidth() + ((frameX - (headOffset * frameXRatio) - movieTitle->GetSize().GetWidth()) / 2), 50)); //Add button basing position off of size and pos of the title of the film
+			styleList[styleCounter] = new wxButton(movieRandom, styleCounter + (noMovies + 1), movies[movieID]->styles[i], wxPoint(movieTitle->GetPosition().x + movieTitle->GetSize().GetWidth() + ((frameX - (headOffset * frameXRatio) - movieTitle->GetSize().GetWidth()) / 2), offsetY * frameYRatio)); //Add button basing position off of size and pos of the title of the film
 		}
 		else
 		{
-			styleList[counter] = new wxButton(movieRandom, counter + (noMovies + 1), movies[movieID]->styles[i], wxPoint((styleList[counter - 1]->GetPosition().x + styleList[counter - 1]->GetSize().GetWidth()), 50)); //Add button basing position off of size and pos of the previous button added
+			styleList[styleCounter] = new wxButton(movieRandom, styleCounter + (noMovies + 1), movies[movieID]->styles[i], wxPoint((styleList[styleCounter - 1]->GetPosition().x + styleList[styleCounter - 1]->GetSize().GetWidth()), offsetY * frameYRatio)); //Add button basing position off of size and pos of the previous button added
 		}
-		styleList[counter]->Bind(wxEVT_BUTTON, &cMain::movieStyleClicked, this); //Bind styleClicked function to added button
-		counter++;
-		//noStyles = counter;
+		styleList[styleCounter]->Bind(wxEVT_BUTTON, &cMain::movieStyleClicked, this); //Bind styleClicked function to added button
+		styleCounter++;
 	}
 	int totalBtnSize = 0;
 	//Works out the total width of all buttons combined
-	for (int i = 0; i < counter; i++) {
+	for (int i = 0; i < styleCounter; i++) {
 		totalBtnSize = totalBtnSize + styleList[i]->GetSize().GetWidth();
 	}
 	//Shifts each button according to the space the buttons occupy
-	for (int i = 0; i < counter; i++) {
+	for (int i = 0; i < styleCounter; i++) {
 		styleList[i]->Move(wxPoint(styleList[i]->GetPosition().x - (totalBtnSize) / 2, styleList[i]->GetPosition().y));
+	}
+
+	/* <-----Add feature buttons----->*/
+
+	int featureCounter = 0; //Initialise/reset counter
+	noFeatures = 4;
+	for (int i = 0; i < 4; i++) {
+		if (movies[movieID]->features[i] == "") {
+			noFeatures--;
+		}
+	}
+	for (int i = 0; i < noFeatures; i++) //
+	{
+		//If this is the first button to be added:
+		if (featureCounter == 0)
+		{
+			featureList[featureCounter] = new wxButton(movieRandom, featureCounter + (noMovies + 1), movies[movieID]->features[i], wxPoint(movieTitle->GetPosition().x + movieTitle->GetSize().GetWidth() + ((frameX - (headOffset * frameXRatio) - movieTitle->GetSize().GetWidth()) / 2), offsetY * frameYRatio + styleList[0]->GetSize().GetHeight())); //Add button basing position off of size and pos of the title of the film
+		}
+		else
+		{
+			featureList[featureCounter] = new wxButton(movieRandom, featureCounter + (noMovies + 1), movies[movieID]->features[i], wxPoint((featureList[featureCounter - 1]->GetPosition().x + featureList[featureCounter - 1]->GetSize().GetWidth()), offsetY * frameYRatio + styleList[0]->GetSize().GetHeight())); //Add button basing position off of size and pos of the previous button added
+		}
+		featureList[featureCounter]->Bind(wxEVT_BUTTON, &cMain::movieFeatureClicked, this); //Bind featureClicked function to added button
+		featureCounter++;
+	}
+	totalBtnSize = 0;
+	//Works out the total width of all buttons combined
+	for (int i = 0; i < featureCounter; i++) {
+		totalBtnSize = totalBtnSize + featureList[i]->GetSize().GetWidth();
+	}
+	//Shifts each button according to the space the buttons occupy
+	for (int i = 0; i < featureCounter; i++) {
+		featureList[i]->Move(wxPoint(featureList[i]->GetPosition().x - (totalBtnSize) / 2, featureList[i]->GetPosition().y));
 	}
 }
 
