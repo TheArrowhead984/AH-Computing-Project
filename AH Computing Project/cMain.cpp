@@ -354,11 +354,10 @@ void cMain::runRandomQuery(std::string mediaType, bool random, int movieID)
 		delete styleList[i]; //Delete style tag buttons one by one
 	}
 	movieTitle->SetLabel(movies[movieID]->title + " (" + std::to_string(movies[movieID]->releaseDate) + ")"); //Set the text to the name of the movie
-	moviePoster->SetBitmap(scaleImage(*movies[movieID]->cover, 500, 700)); //Load the poster
+	moviePoster->SetBitmap(scaleImage(*movies[movieID]->cover, 500 * frameXRatio, 700 * frameYRatio)); //Load the poster
 	movieDesc->SetLabel("The " + mediaType.substr(0, mediaType.size() - 1) + " directed by " + movies[movieID]->director + ", follows " + movies[movieID]->description); //Update description
-	movieDesc->Wrap(frameX - (movieDesc->GetPosition().x + (headOffset * frameXRatio))); //Wraptext
+	movieDesc->Wrap(frameX - (movieDesc->GetPosition().x + 2 * (headOffset * frameXRatio))); //Wraptext
 	movieRandom->Fit(); //Update window after wrapping text
-	std::stringstream iss(); //Prepare string for splitting (Assign stringstream data type)
 	int counter = 0; //Initialise/reset counter
 	noStyles = 8;
 	for (int i = 0; i < 8; i++) {
@@ -505,12 +504,12 @@ cMain::cMain() : wxFrame(nullptr, wxID_ANY, "RECOMMENGINE", wxPoint(0, 0))
 	movieSortChoice->SetSelection(0);
 	//Random
 	movieRandom->SetFont(headingFont);
-	movieTitle = new wxStaticText(movieRandom, wxID_ANY, "Blade Runner (1982)", wxPoint(30, 30));
+	movieTitle = new wxStaticText(movieRandom, wxID_ANY, "Blade Runner (1982)", wxPoint(30 * frameXRatio, 30 * frameYRatio));
 	movieTitle->SetFont(titleFont);
-	moviePoster = new wxStaticBitmap(movieRandom, wxID_ANY, scaleImage(wxBitmap("Resources/Gallery/movies/Blade Runner/Cover.png", wxBITMAP_TYPE_PNG), 500, 700), wxPoint(10, 100));
-	movieDescHeader = new wxStaticText(movieRandom, wxID_ANY, "SUMMARY:", wxPoint(550, 120));
-	movieDesc = new wxStaticText(movieRandom, wxID_ANY, "In the film directed by Ridley Scott, Rick Deckard, an ex - policeman, becomes a special agent with a mission to exterminate a group of violent androids.\nAs he starts getting deeper into his mission, he questions his own identity.", wxPoint(550, 200));
-	randomizerButton = new wxButton(movieRandom, 3, "NEW RANDOM MOVIE", wxPoint(100, 850));
+	moviePoster = new wxStaticBitmap(movieRandom, wxID_ANY, scaleImage(wxBitmap("Resources/Gallery/movies/Blade Runner/Cover.png", wxBITMAP_TYPE_PNG), 500 * frameXRatio, 700 * frameYRatio), wxPoint(10 * frameXRatio, 100 * frameYRatio));
+	movieDescHeader = new wxStaticText(movieRandom, wxID_ANY, "SUMMARY:", wxPoint(550 * frameXRatio, 120 * frameYRatio));
+	movieDesc = new wxStaticText(movieRandom, wxID_ANY, "In the film directed by Ridley Scott, Rick Deckard, an ex - policeman, becomes a special agent with a mission to exterminate a group of violent androids.\nAs he starts getting deeper into his mission, he questions his own identity.", wxPoint(550 * frameXRatio, 200 * frameYRatio));
+	randomizerButton = new wxButton(movieRandom, 3, "NEW RANDOM MOVIE", wxPoint(100 * frameXRatio, 850 * frameYRatio));
 	moviePoster->SetFocus();
 
 	//Attach containers to pages of notebook and apply font
