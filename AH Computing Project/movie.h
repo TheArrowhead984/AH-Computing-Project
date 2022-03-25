@@ -1,6 +1,7 @@
 class movie {
 public:
     /* <-----Class Variables----->*/
+    int movieID;
     wxBitmap *cover = nullptr;
     std::string title = "";
     std::string director = "";
@@ -14,6 +15,7 @@ public:
     /* <-----Class Methods----->*/
     //Default Constructor
     movie() {
+        movieID = 0;
         cover = nullptr;
         title = "";
         director = "";
@@ -29,7 +31,8 @@ public:
         description = "";
     }
     //Constructor
-    movie(wxBitmap *cvr, std::string tle, std::string dir, int relDte, std::string ageRat, std::string dur, std::string feats[], std::string stys[], std::string desc) {
+    movie(int id, wxBitmap *cvr, std::string tle, std::string dir, int relDte, std::string ageRat, std::string dur, std::string feats[], std::string stys[], std::string desc) {
+        movieID = id;
         cover = cvr;
         title = tle;
         director = dir;

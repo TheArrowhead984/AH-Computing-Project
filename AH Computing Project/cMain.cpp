@@ -49,12 +49,12 @@ int noMovies = 0;
 int noResults = 0;
 int noStyles = 0;
 int noFeatures = 0;
-wxBitmapButton *movieCovers[100];
-wxStaticText *movieInfo[100];
+wxBitmapButton *movieCovers[50];
+wxStaticText *movieInfo[50];
 wxButton *styleList[8];
 wxButton *featureList[4];
 int previousMovie = 0;
-movie *movies[100];
+movie *movies[50];
 
 /* <------------------Functions------------------>*/
 
@@ -86,14 +86,12 @@ int getNumberOfEntries(std::string mediaType) {
 				return std::stoi(row[0]);
 			}
 		}
-		else { return 44; }
 	}
-	else { return 44; }
 }
 
 void initializeMovies(int movieID) {
 
-	qstate = mysql_query(conn, ("SELECT * FROM movies WHERE movieID = " + std::to_string(movieID)).c_str()); //Run query
+	qstate = mysql_query(conn, ("SELECT * FROM movies WHERE movieID = " + std::to_string(movieID + 1)).c_str()); //Run query
 	if (!qstate) //If query executes without error
 	{
 		res = mysql_store_result(conn);
@@ -120,7 +118,7 @@ void initializeMovies(int movieID) {
 					features[featCounter] = singleLine;
 					featCounter++;
 				}
-				movies[movieID] = new movie(new wxBitmap("Resources/Gallery/movies/" + std::string(row[1]) + "/Cover.png", wxBITMAP_TYPE_PNG), std::string(row[1]), std::string(row[2]), std::stoi(row[3]), std::string(row[4]), std::string(row[5]), features, styles, std::string(row[8]));
+				movies[movieID] = new movie(std::stoi(row[0]), new wxBitmap("Resources/Gallery/movies/" + std::string(row[1]) + "/Cover.png", wxBITMAP_TYPE_PNG), std::string(row[1]), std::string(row[2]), std::stoi(row[3]), std::string(row[4]), std::string(row[5]), features, styles, std::string(row[8]));
 			}
 		}
 	}
@@ -267,7 +265,7 @@ void cMain::sortChoiceMade(wxCommandEvent &evt)
 }
 
 /* <-----Procedure that constructs and executes SQL queries from selected filters----->*/
-void cMain::runFilterQuery(std::string mediaType, wxBitmapButton *mediaTypeCovers[100], wxStaticText *mediaTypeInfo[100], bool filterStyle, bool filterFeature, bool filterAge, bool filterRelease, bool filterDuration, wxString selectedStyle, wxString selectedFeature, wxString selectedAge, wxString selectedReleaseStart, wxString selectedReleaseEnd, wxString selectedDurationStart, wxString selectedDurationEnd, wxString sortedField, bool sortDirection)
+void cMain::runFilterQuery(std::string mediaType, wxBitmapButton *mediaTypeCovers[50], wxStaticText *mediaTypeInfo[50], bool filterStyle, bool filterFeature, bool filterAge, bool filterRelease, bool filterDuration, wxString selectedStyle, wxString selectedFeature, wxString selectedAge, wxString selectedReleaseStart, wxString selectedReleaseEnd, wxString selectedDurationStart, wxString selectedDurationEnd, wxString sortedField, bool sortDirection)
 {
 	//Construct SQL query from user filters
 	std::string queryStr = "SELECT movieID FROM " + mediaType + " WHERE ";
@@ -293,14 +291,126 @@ void cMain::runFilterQuery(std::string mediaType, wxBitmapButton *mediaTypeCover
 	if (filterStyle != true && filterFeature != true && filterAge != true && filterRelease != true && filterDuration != true) {
 		queryStr = "SELECT movieID FROM " + mediaType;
 	}
-	sortedField.erase(std::remove(sortedField.begin(), sortedField.end(), ' '), sortedField.end());
-	queryStr.append(" ORDER BY " + sortedField + " " + (sortDirection ? "desc" : "asc"));
+	//Insertion sort movies
+	if (sortedField == "Title") {
+		movie *value;
+		for (int i = 1; i < noMovies; i++) {
+			value = movies[i];
+			if (sortDirection) {
+				while (i > 0 && value->title > movies[i - 1]->title) {
+					movies[i] = movies[i - 1];
+					i--;
+				}
+			}
+			else {
+				while (i > 0 && value->title < movies[i - 1]->title) {
+					movies[i] = movies[i - 1];
+					i--;
+				}
+			}
+			movies[i] = value;
+		}
+	}
+	else if (sortedField == "Director") {
+		movie *value;
+		for (int i = 1; i < noMovies; i++) {
+			value = movies[i];
+			if (sortDirection) {
+				while (i > 0 && value->director > movies[i - 1]->director) {
+					movies[i] = movies[i - 1];
+					i--;
+				}
+			}
+			else {
+				while (i > 0 && value->director < movies[i - 1]->director) {
+					movies[i] = movies[i - 1];
+					i--;
+				}
+			}
+			movies[i] = value;
+		}
+	}
+	else if (sortedField == "Release Date") {
+		movie *value;
+		for (int i = 1; i < noMovies; i++) {
+			value = movies[i];
+			if (sortDirection) {
+				while (i > 0 && value->releaseDate > movies[i - 1]->releaseDate) {
+					movies[i] = movies[i - 1];
+					i--;
+				}
+			}
+			else {
+				while (i > 0 && value->releaseDate < movies[i - 1]->releaseDate) {
+					movies[i] = movies[i - 1];
+					i--;
+				}
+			}
+			movies[i] = value;
+		}
+	}
+	else if (sortedField == "Age Rating") {
+		movie *value;
+		for (int i = 1; i < noMovies; i++) {
+			value = movies[i];
+			if (value->ageRating == "PG") {
+				value->ageRating = "10";
+			}
+			if (movies[i - 1]->ageRating == "PG") {
+				movies[i - 1]->ageRating = "10";
+			}
+			if (sortDirection) {
+				while (i > 0 && value->ageRating > movies[i - 1]->ageRating) {
+					movies[i] = movies[i - 1];
+					i--;
+				}
+			}
+			else {
+				while (i > 0 && value->ageRating < movies[i - 1]->ageRating) {
+					movies[i] = movies[i - 1];
+					i--;
+				}
+			}
+			movies[i] = value;
+
+		}
+		for (int i = 0; i < noMovies; i++) {
+			if (movies[i]->ageRating == "10") {
+				movies[i]->ageRating = "PG";
+			}
+		}
+	}
+	else if (sortedField == "Duration") {
+		movie *value;
+		for (int i = 1; i < noMovies; i++) {
+			value = movies[i];
+			if (sortDirection) {
+				while (i > 0 && value->duration > movies[i - 1]->duration) {
+					movies[i] = movies[i - 1];
+					i--;
+				}
+			}
+			else {
+				while (i > 0 && value->duration < movies[i - 1]->duration) {
+					movies[i] = movies[i - 1];
+					i--;
+				}
+			}
+			movies[i] = value;
+		}
+	}
+
+
+
 	//Execute constructed query
 	qstate = mysql_query(conn, queryStr.c_str());
 	if (!qstate) //If query executes successfully
 	{
 		res = mysql_store_result(conn);
-		int counter = 0; //Initialise counter var
+		int mediaTypeIndexes[50];
+		for (int i = 0; i < 50; i++) {
+			mediaTypeIndexes[i] = 0;
+		}
 
 		if (res->row_count > 0) {
 			//Delete all covers currently on display from previous query
@@ -308,43 +418,66 @@ void cMain::runFilterQuery(std::string mediaType, wxBitmapButton *mediaTypeCover
 				delete mediaTypeCovers[i];
 				delete mediaTypeInfo[i];
 			}
+			int counter = 0;
 			while (row = mysql_fetch_row(res))
 			{
-				wxBitmap cover = *movies[std::stoi(row[0])]->cover;
-				//Define default cover dimensions
-				cover = scaleImage(cover, coverX, coverY); //Scale the cover to the correct dimensions
-				//Add each cover as a button, with an ID that is equal to the movie's ID + an int (To avoid interference with other buttons and allow for the movieID to be calculated using the ID of the object)
-				mediaTypeCovers[counter] = new wxBitmapButton(movieFiltering, std::stoi(row[0]) + 6, cover, wxPoint(((counter * (coverX + (10 * frameXRatio))) - ((floor(counter / 10)) * 10 * (coverX + (10 * frameXRatio))) + 15 * frameXRatio), (((floor(counter / 10)) * (coverY + 100 * frameYRatio)) + (200) * frameYRatio)), wxDefaultSize, wxBORDER_NONE);
-				//Bind the imageClicked function to each button
-				mediaTypeCovers[counter]->Bind(wxEVT_BUTTON, &cMain::movieImageClicked, this);
-				std::string movieInfoStr = movies[std::stoi(row[0])]->title;
-				//Determine what information to display
-				if (sortedField == "Title") {
-					movieInfoStr = movies[std::stoi(row[0])]->title;
+				for (int i = 0; i < noMovies; i++) {
+					if (movies[i]->movieID == std::stoi(row[0])) {
+						mediaTypeIndexes[counter] = i;
+						counter++;
+					}
 				}
-				else if (sortedField == "Director") {
-					movieInfoStr = movies[std::stoi(row[0])]->director;
-				}
-				else if (sortedField == "ReleaseDate") {
-					movieInfoStr = std::to_string(movies[std::stoi(row[0])]->releaseDate);
-				}
-				else if (sortedField == "AgeRating") {
-					movieInfoStr = movies[std::stoi(row[0])]->ageRating;
-				}
-				else if (sortedField == "Duration") {
-					movieInfoStr = movies[std::stoi(row[0])]->duration;
-				}
-				mediaTypeInfo[counter] = new wxStaticText(movieFiltering, wxID_ANY, movieInfoStr, wxPoint(mediaTypeCovers[counter]->GetPosition().x + (mediaTypeCovers[counter]->GetSize().GetWidth()) / 2, (((floor(counter / 10)) * (coverY + 100 * frameYRatio)) + (200 * frameYRatio + coverY))), wxDefaultSize, wxALIGN_CENTRE_HORIZONTAL);
-				mediaTypeInfo[counter]->SetFont(wxFontInfo(20 * frameXRatio)); //Scale text slightly
-				mediaTypeInfo[counter]->Wrap(coverX); //Wraptext
-				mediaTypeInfo[counter]->SetPosition(wxPoint(mediaTypeInfo[counter]->GetPosition().x - (mediaTypeInfo[counter]->GetSize().GetWidth()) / 2, mediaTypeInfo[counter]->GetPosition().y + (15 * frameYRatio))); //Center text under cover
-				counter++;
-				noResults = counter;
 			}
+			noResults = counter;
 		}
 		//If the query runs successfully but doesn't return any results display a message to the user
 		else {
 			wxMessageBox("Hmmmm...It appears there are no " + mediaType + " that fit your filters", wxT("No Results, Unfortunately"));
+		}
+
+		int currentMovie = 0;
+
+		int value2 = 0;
+		for (int i = 1; i < noResults; i++) {
+			value2 = mediaTypeIndexes[i];
+			while (i > 0 && value2 < mediaTypeIndexes[i - 1]) {
+				mediaTypeIndexes[i] = mediaTypeIndexes[i - 1];
+				i--;
+			}
+			mediaTypeIndexes[i] = value2;
+		}
+
+		for (int i = 0; i < noResults; i++) {
+			currentMovie = mediaTypeIndexes[i];
+
+			wxBitmap cover = *movies[currentMovie]->cover;
+			//Define default cover dimensions
+			cover = scaleImage(cover, coverX, coverY); //Scale the cover to the correct dimensions
+			//Add each cover as a button, with an ID that is equal to the movie's ID + an int (To avoid interference with other buttons and allow for the movieID to be calculated using the ID of the object)
+			mediaTypeCovers[i] = new wxBitmapButton(movieFiltering, movies[currentMovie]->movieID + 6, cover, wxPoint(((i * (coverX + (10 * frameXRatio))) - ((floor(i / 10)) * 10 * (coverX + (10 * frameXRatio))) + 15 * frameXRatio), (((floor(i / 10)) * (coverY + 100 * frameYRatio)) + (200) * frameYRatio)), wxDefaultSize, wxBORDER_NONE);
+			//Bind the imageClicked function to each button
+			mediaTypeCovers[i]->Bind(wxEVT_BUTTON, &cMain::movieImageClicked, this);
+			std::string movieInfoStr = movies[currentMovie]->title;
+			//Determine what information to display
+			if (sortedField == "Title") {
+				movieInfoStr = movies[currentMovie]->title;
+			}
+			else if (sortedField == "Director") {
+				movieInfoStr = movies[currentMovie]->director;
+			}
+			else if (sortedField == "Release Date") {
+				movieInfoStr = std::to_string(movies[currentMovie]->releaseDate);
+			}
+			else if (sortedField == "Age Rating") {
+				movieInfoStr = movies[currentMovie]->ageRating;
+			}
+			else if (sortedField == "Duration") {
+				movieInfoStr = movies[currentMovie]->duration;
+			}
+			mediaTypeInfo[i] = new wxStaticText(movieFiltering, wxID_ANY, movieInfoStr, wxPoint(mediaTypeCovers[i]->GetPosition().x + (mediaTypeCovers[i]->GetSize().GetWidth()) / 2, (((floor(i / 10)) * (coverY + 100 * frameYRatio)) + (200 * frameYRatio + coverY))), wxDefaultSize, wxALIGN_CENTRE_HORIZONTAL);
+			mediaTypeInfo[i]->SetFont(wxFontInfo(20 * frameXRatio)); //Scale text slightly
+			mediaTypeInfo[i]->Wrap(coverX); //Wraptext
+			mediaTypeInfo[i]->SetPosition(wxPoint(mediaTypeInfo[i]->GetPosition().x - (mediaTypeInfo[i]->GetSize().GetWidth()) / 2, mediaTypeInfo[i]->GetPosition().y + (15 * frameYRatio))); //Center text under cover
 		}
 	}
 	//If the query fails to run successfully display the error number and the meaning of the error
@@ -377,9 +510,15 @@ void cMain::runRandomQuery(std::string mediaType, bool random, int movieID)
 	{
 		delete featureList[i]; //Delete style tag buttons one by one
 	}
-	movieTitle->SetLabel(movies[movieID]->title + " (" + std::to_string(movies[movieID]->releaseDate) + ") - " + std::to_string(stoi(movies[movieID]->duration.substr(0, 2))) + (stoi(movies[movieID]->duration.substr(0, 2)) == 1 ? "hr " : "hrs ") + std::to_string(stoi(movies[movieID]->duration.substr(3, 2))) + (stoi(movies[movieID]->duration.substr(3, 2)) == 1 ? "min " : "mins ")); //Set the text to the name of the movie
-	moviePoster->SetBitmap(scaleImage(*movies[movieID]->cover, 500 * frameXRatio, 700 * frameYRatio)); //Load the poster
-	movieDesc->SetLabel("The " + mediaType.substr(0, mediaType.size() - 1) + " directed by " + movies[movieID]->director + ", follows " + movies[movieID]->description); //Update description
+	int currentMovie = 0;
+	for (int i = 0; i < noMovies; i++) {
+		if (movies[i]->movieID == movieID) {
+			currentMovie = i;
+		}
+	}
+	movieTitle->SetLabel(movies[currentMovie]->title + " (" + std::to_string(movies[currentMovie]->releaseDate) + ") - " + std::to_string(stoi(movies[currentMovie]->duration.substr(0, 2))) + (stoi(movies[currentMovie]->duration.substr(0, 2)) == 1 ? "hr " : "hrs ") + std::to_string(stoi(movies[currentMovie]->duration.substr(3, 2))) + (stoi(movies[currentMovie]->duration.substr(3, 2)) == 1 ? "min " : "mins ")); //Set the text to the name of the movie
+	moviePoster->SetBitmap(scaleImage(*movies[currentMovie]->cover, 500 * frameXRatio, 700 * frameYRatio)); //Load the poster
+	movieDesc->SetLabel("The " + mediaType.substr(0, mediaType.size() - 1) + " directed by " + (movies[currentMovie]->director.rfind("The", 0) == 0 ? (char)(tolower(movies[currentMovie]->director[0])) + movies[currentMovie]->director.substr(1, movies[currentMovie]->director.size() - 1) : movies[currentMovie]->director) + ", follows " + movies[currentMovie]->description); //Update description
 	movieDesc->Wrap(frameX - (movieDesc->GetPosition().x + 2 * (headOffset * frameXRatio))); //Wraptext
 	movieRandom->Fit(); //Update window after wrapping text
 
@@ -388,7 +527,7 @@ void cMain::runRandomQuery(std::string mediaType, bool random, int movieID)
 	int styleCounter = 0; //Initialise/reset counter
 	noStyles = 8;
 	for (int i = 0; i < 8; i++) {
-		if (movies[movieID]->styles[i] == "") {
+		if (movies[currentMovie]->styles[i] == "") {
 			noStyles--;
 		}
 	}
@@ -397,11 +536,11 @@ void cMain::runRandomQuery(std::string mediaType, bool random, int movieID)
 		//If this is the first button to be added:
 		if (styleCounter == 0)
 		{
-			styleList[styleCounter] = new wxButton(movieRandom, styleCounter + (noMovies + 1), movies[movieID]->styles[i], wxPoint(movieTitle->GetPosition().x + movieTitle->GetSize().GetWidth() + ((frameX - (headOffset * frameXRatio) - movieTitle->GetSize().GetWidth()) / 2), offsetY * frameYRatio)); //Add button basing position off of size and pos of the title of the film
+			styleList[styleCounter] = new wxButton(movieRandom, styleCounter + (noMovies + 1), movies[currentMovie]->styles[i], wxPoint(movieTitle->GetPosition().x + movieTitle->GetSize().GetWidth() + ((frameX - (headOffset * frameXRatio) - movieTitle->GetSize().GetWidth()) / 2), offsetY * frameYRatio)); //Add button basing position off of size and pos of the title of the film
 		}
 		else
 		{
-			styleList[styleCounter] = new wxButton(movieRandom, styleCounter + (noMovies + 1), movies[movieID]->styles[i], wxPoint((styleList[styleCounter - 1]->GetPosition().x + styleList[styleCounter - 1]->GetSize().GetWidth()), offsetY * frameYRatio)); //Add button basing position off of size and pos of the previous button added
+			styleList[styleCounter] = new wxButton(movieRandom, styleCounter + (noMovies + 1), movies[currentMovie]->styles[i], wxPoint((styleList[styleCounter - 1]->GetPosition().x + styleList[styleCounter - 1]->GetSize().GetWidth()), offsetY * frameYRatio)); //Add button basing position off of size and pos of the previous button added
 		}
 		styleList[styleCounter]->Bind(wxEVT_BUTTON, &cMain::movieStyleClicked, this); //Bind styleClicked function to added button
 		styleCounter++;
@@ -421,7 +560,7 @@ void cMain::runRandomQuery(std::string mediaType, bool random, int movieID)
 	int featureCounter = 0; //Initialise/reset counter
 	noFeatures = 4;
 	for (int i = 0; i < 4; i++) {
-		if (movies[movieID]->features[i] == "") {
+		if (movies[currentMovie]->features[i] == "") {
 			noFeatures--;
 		}
 	}
@@ -430,11 +569,11 @@ void cMain::runRandomQuery(std::string mediaType, bool random, int movieID)
 		//If this is the first button to be added:
 		if (featureCounter == 0)
 		{
-			featureList[featureCounter] = new wxButton(movieRandom, featureCounter + (noMovies + 1), movies[movieID]->features[i], wxPoint(movieTitle->GetPosition().x + movieTitle->GetSize().GetWidth() + ((frameX - (headOffset * frameXRatio) - movieTitle->GetSize().GetWidth()) / 2), offsetY * frameYRatio + styleList[0]->GetSize().GetHeight())); //Add button basing position off of size and pos of the title of the film
+			featureList[featureCounter] = new wxButton(movieRandom, featureCounter + (noMovies + 1), movies[currentMovie]->features[i], wxPoint(movieTitle->GetPosition().x + movieTitle->GetSize().GetWidth() + ((frameX - (headOffset * frameXRatio) - movieTitle->GetSize().GetWidth()) / 2), offsetY * frameYRatio + styleList[0]->GetSize().GetHeight())); //Add button basing position off of size and pos of the title of the film
 		}
 		else
 		{
-			featureList[featureCounter] = new wxButton(movieRandom, featureCounter + (noMovies + 1), movies[movieID]->features[i], wxPoint((featureList[featureCounter - 1]->GetPosition().x + featureList[featureCounter - 1]->GetSize().GetWidth()), offsetY * frameYRatio + styleList[0]->GetSize().GetHeight())); //Add button basing position off of size and pos of the previous button added
+			featureList[featureCounter] = new wxButton(movieRandom, featureCounter + (noMovies + 1), movies[currentMovie]->features[i], wxPoint((featureList[featureCounter - 1]->GetPosition().x + featureList[featureCounter - 1]->GetSize().GetWidth()), offsetY * frameYRatio + styleList[0]->GetSize().GetHeight())); //Add button basing position off of size and pos of the previous button added
 		}
 		featureList[featureCounter]->Bind(wxEVT_BUTTON, &cMain::movieFeatureClicked, this); //Bind featureClicked function to added button
 		featureCounter++;
@@ -587,7 +726,7 @@ cMain::cMain() : wxFrame(nullptr, wxID_ANY, "RECOMMENGINE", wxPoint(0, 0))
 	movieFeatureCombo->SetSelection(0);
 	movieAgeCombo->SetSelection(0);
 	noMovies = getNumberOfEntries("movies");
-	for (int i = 1; i <= noMovies; i++) {
+	for (int i = 0; i < noMovies; i++) {
 		initializeMovies(i);
 	}
 	runFilterQuery("movies", movieCovers, movieInfo);
