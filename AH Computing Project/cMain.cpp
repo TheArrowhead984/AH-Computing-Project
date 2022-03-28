@@ -27,7 +27,7 @@ MYSQL_RES *res;
 //Scaling values
 float offsetY = 49.0f;
 float choiceOffset = 5.0f;
-float headOffset = 25.0f;
+float headOffset = 27.5f;
 int titleFontSize = 30;
 int NBfontSize = 20;
 int headingFontSize = 20;
@@ -36,8 +36,8 @@ int frameX = 0;
 int frameY = 0;
 double frameXRatio = 0.0;
 double frameYRatio = 0.0;
-int coverX = 237;
-int coverY = 355;
+int coverX = 240;
+int coverY = 360;
 
 //Sorting Variables
 std::string movieSortDataType = "Alpha";
@@ -75,6 +75,7 @@ int randInt(int start, int end)
 	return distr(gen);
 }
 
+/* <-----Function that checks how many entries are in the database----->*/
 int getNumberOfEntries(std::string mediaType) {
 	wxString queryStr = "SELECT COUNT(*) FROM " + mediaType;
 	qstate = mysql_query(conn, queryStr); //Run query
@@ -89,6 +90,7 @@ int getNumberOfEntries(std::string mediaType) {
 	}
 }
 
+/* <-----Procedure that fills in details about each movie----->*/
 void initializeMovies(int movieID) {
 
 	qstate = mysql_query(conn, ("SELECT * FROM movies WHERE movieID = " + std::to_string(movieID + 1)).c_str()); //Run query
@@ -126,7 +128,7 @@ void initializeMovies(int movieID) {
 
 /* <------------------Event Procedures------------------>*/
 
-/* <-----Procedure that translates selections from choice widgets to vars----->*/
+/* <-----Procedure that passes selections from choice widgets to run filter query procedure----->*/
 void cMain::movieApplyFilters(wxCommandEvent &evt)
 {
 	//Convert selections to strings
@@ -180,7 +182,7 @@ void cMain::movieResetFilters(wxCommandEvent &evt)
 	movieSortDataType = "Alpha";
 	movieSort = false;
 	movieSortType = true;
-	movieSortDirection->SetBitmap(scaleImage(wxBitmap("Resources/Gallery/UI/" + movieSortDataType + " - Ascending.png", wxBITMAP_TYPE_PNG), (int)(34 * frameXRatio + 0.5), (int)(34 * frameYRatio + 0.5)));
+	movieSortDirection->SetBitmap(scaleImage(wxBitmap("Resources/Gallery/UI/Sorting/" + movieSortDataType + " - Ascending.png", wxBITMAP_TYPE_PNG), (int)(34 * frameXRatio + 0.5), (int)(34 * frameYRatio + 0.5)));
 	runFilterQuery("movies", movieCovers, movieInfo); //Run filter query without any filters applied
 }
 
@@ -207,10 +209,11 @@ void cMain::movieStyleClicked(wxCommandEvent &evt)
 	movieSortDataType = "Alpha";
 	movieSort = false;
 	movieSortType = true;
-	movieSortDirection->SetBitmap(scaleImage(wxBitmap("Resources/Gallery/UI/" + movieSortDataType + " - Ascending.png", wxBITMAP_TYPE_PNG), (int)(34 * frameXRatio + 0.5), (int)(34 * frameYRatio + 0.5)));
+	movieSortDirection->SetBitmap(scaleImage(wxBitmap("Resources/Gallery/UI/Sorting/" + movieSortDataType + " - Ascending.png", wxBITMAP_TYPE_PNG), (int)(34 * frameXRatio + 0.5), (int)(34 * frameYRatio + 0.5)));
 	runFilterQuery("movies", movieCovers, movieInfo, true, false, false, false, false, btn->GetLabel()); //Filter for the style the user selected
 }
 
+/* <-----Procedure that filters for a feature shown on the random page----->*/
 void cMain::movieFeatureClicked(wxCommandEvent &evt)
 {
 	searchTypeNB->ChangeSelection(0);
@@ -226,28 +229,30 @@ void cMain::movieFeatureClicked(wxCommandEvent &evt)
 	movieSortDataType = "Alpha";
 	movieSort = false;
 	movieSortType = true;
-	movieSortDirection->SetBitmap(scaleImage(wxBitmap("Resources/Gallery/UI/" + movieSortDataType + " - Ascending.png", wxBITMAP_TYPE_PNG), (int)(34 * frameXRatio + 0.5), (int)(34 * frameYRatio + 0.5)));
+	movieSortDirection->SetBitmap(scaleImage(wxBitmap("Resources/Gallery/UI/Sorting/" + movieSortDataType + " - Ascending.png", wxBITMAP_TYPE_PNG), (int)(34 * frameXRatio + 0.5), (int)(34 * frameYRatio + 0.5)));
 	runFilterQuery("movies", movieCovers, movieInfo, false, true, false, false, false, "", btn->GetLabel()); //Filter for the style the user selected
 }
 
-/* <-----Procedure that generates a random movie----->*/
+/* <-----Procedure that runs the random query procedure, this is done because of event handling----->*/
 void cMain::newRandomMovie(wxCommandEvent &evt)
 {
-	runRandomQuery("movies", true, 0);
+	runRandomQuery("movies", true);
 }
 
+/* <-----Procedure for updating sort direction when the icon is clicked----->*/
 void cMain::changeSortDirection(wxCommandEvent &evt)
 {
 	if (movieSort) {
-		movieSortDirection->SetBitmap(scaleImage(wxBitmap("Resources/Gallery/UI/" + movieSortDataType + " - Ascending.png", wxBITMAP_TYPE_PNG), (int)(34 * frameXRatio + 0.5), (int)(34 * frameYRatio + 0.5)));
+		movieSortDirection->SetBitmap(scaleImage(wxBitmap("Resources/Gallery/UI/Sorting/" + movieSortDataType + " - Ascending.png", wxBITMAP_TYPE_PNG), (int)(34 * frameXRatio + 0.5), (int)(34 * frameYRatio + 0.5)));
 		movieSort = false;
 	}
 	else {
-		movieSortDirection->SetBitmap(scaleImage(wxBitmap("Resources/Gallery/UI/" + movieSortDataType + " - Descending.png", wxBITMAP_TYPE_PNG), (int)(34 * frameXRatio + 0.5), (int)(34 * frameYRatio + 0.5)));
+		movieSortDirection->SetBitmap(scaleImage(wxBitmap("Resources/Gallery/UI/Sorting/" + movieSortDataType + " - Descending.png", wxBITMAP_TYPE_PNG), (int)(34 * frameXRatio + 0.5), (int)(34 * frameYRatio + 0.5)));
 		movieSort = true;
 	}
 }
 
+/* <-----Procedure for updating sort direction image when changing what field to sort by---->*/
 void cMain::sortChoiceMade(wxCommandEvent &evt)
 {
 	if (movieSortChoice->GetStringSelection() == "Title" || movieSortChoice->GetStringSelection() == "Director") {
@@ -257,10 +262,10 @@ void cMain::sortChoiceMade(wxCommandEvent &evt)
 		movieSortDataType = "Number";
 	}
 	if (movieSort) {
-		movieSortDirection->SetBitmap(scaleImage(wxBitmap("Resources/Gallery/UI/" + movieSortDataType + " - Descending.png", wxBITMAP_TYPE_PNG), (int)(34 * frameXRatio + 0.5), (int)(34 * frameYRatio + 0.5)));
+		movieSortDirection->SetBitmap(scaleImage(wxBitmap("Resources/Gallery/UI/Sorting/" + movieSortDataType + " - Descending.png", wxBITMAP_TYPE_PNG), (int)(34 * frameXRatio + 0.5), (int)(34 * frameYRatio + 0.5)));
 	}
 	else {
-		movieSortDirection->SetBitmap(scaleImage(wxBitmap("Resources/Gallery/UI/" + movieSortDataType + " - Ascending.png", wxBITMAP_TYPE_PNG), (int)(34 * frameXRatio + 0.5), (int)(34 * frameYRatio + 0.5)));
+		movieSortDirection->SetBitmap(scaleImage(wxBitmap("Resources/Gallery/UI/Sorting/" + movieSortDataType + " - Ascending.png", wxBITMAP_TYPE_PNG), (int)(34 * frameXRatio + 0.5), (int)(34 * frameYRatio + 0.5)));
 	}
 }
 
@@ -491,9 +496,8 @@ void cMain::runFilterQuery(std::string mediaType, wxBitmapButton *mediaTypeCover
 /* <-----Procedure that picks a random movie, or takes in a specific movieID, and displays relevant info---->*/
 void cMain::runRandomQuery(std::string mediaType, bool random, int movieID)
 {
-	wxString queryStr = "";
 	//If random movie is wanted
-	if (random == true)
+	if (random)
 	{
 		movieID = randInt(1, noMovies); //Generate random movieID
 		//If the movie picked is the same as the previous one, reroll until a different one is found
@@ -517,6 +521,8 @@ void cMain::runRandomQuery(std::string mediaType, bool random, int movieID)
 		}
 	}
 	movieTitle->SetLabel(movies[currentMovie]->title + " (" + std::to_string(movies[currentMovie]->releaseDate) + ") - " + std::to_string(stoi(movies[currentMovie]->duration.substr(0, 2))) + (stoi(movies[currentMovie]->duration.substr(0, 2)) == 1 ? "hr " : "hrs ") + std::to_string(stoi(movies[currentMovie]->duration.substr(3, 2))) + (stoi(movies[currentMovie]->duration.substr(3, 2)) == 1 ? "min " : "mins ")); //Set the text to the name of the movie
+	movieAge->SetBitmap(scaleImage(wxBitmap("Resources/Gallery/UI/BBFC/" + movies[currentMovie]->ageRating + ".jpg", wxBITMAP_TYPE_JPEG), 75 * frameXRatio, 75 * frameYRatio));
+	movieAge->SetPosition(wxPoint(movieTitle->GetPosition().x + movieTitle->GetSize().GetWidth() + 25 * frameXRatio, movieTitle->GetPosition().y - 10 * frameYRatio));
 	moviePoster->SetBitmap(scaleImage(*movies[currentMovie]->cover, 500 * frameXRatio, 700 * frameYRatio)); //Load the poster
 	movieDesc->SetLabel("The " + mediaType.substr(0, mediaType.size() - 1) + " directed by " + (movies[currentMovie]->director.rfind("The", 0) == 0 ? (char)(tolower(movies[currentMovie]->director[0])) + movies[currentMovie]->director.substr(1, movies[currentMovie]->director.size() - 1) : movies[currentMovie]->director) + ", follows " + movies[currentMovie]->description); //Update description
 	movieDesc->Wrap(frameX - (movieDesc->GetPosition().x + 2 * (headOffset * frameXRatio))); //Wraptext
@@ -624,8 +630,7 @@ cMain::cMain() : wxFrame(nullptr, wxID_ANY, "RECOMMENGINE", wxPoint(0, 0))
 	title = new wxStaticText(basePanel, wxID_ANY, "RECOMMENGINE", wxDefaultPosition, wxSize(wxWindow::GetSize().GetWidth(), 0), wxALIGN_CENTER);
 	title->SetFont(titleFont);
 	title->SetBackgroundColour("Grey");
-	mediaNB = new wxNotebook(basePanel, wxID_ANY, wxPoint(0, title->GetSize().GetHeight()), basePanel->GetSize(), wxNB_LEFT);
-	searchTypeNB = new wxNotebook(mediaNB, wxID_ANY, wxPoint(headOffset * frameXRatio, 0));
+	searchTypeNB = new wxNotebook(basePanel, wxID_ANY, wxPoint(0, title->GetSize().GetHeight()), basePanel->GetSize());
 	movieFiltering = new wxScrolledWindow(searchTypeNB, wxID_ANY);
 	movieFiltering->SetScrollbars(0, 20, 0, 127 * frameYRatio);
 	movieRandom = new wxPanel(searchTypeNB, wxID_ANY);
@@ -697,13 +702,14 @@ cMain::cMain() : wxFrame(nullptr, wxID_ANY, "RECOMMENGINE", wxPoint(0, 0))
 	movieApplyFiltersBtn->SetFont(btnFont);
 	movieResetFiltersBtn = new wxButton(movieFiltering, 2, "RESET", wxPoint(movieApplyFiltersBtn->GetPosition().x + movieApplyFiltersBtn->GetSize().GetWidth() + headOffset * frameXRatio, (offsetY * frameYRatio) - 1));
 	movieResetFiltersBtn->SetFont(btnFont);
-	movieSortDirection = new wxBitmapButton(movieFiltering, 4, scaleImage(wxBitmap("Resources/Gallery/UI/Alpha - Ascending.png", wxBITMAP_TYPE_PNG), (int)(34 * frameXRatio + 0.5), (int)(34 * frameYRatio + 0.5)), wxPoint(headOffset * frameXRatio, offsetY * frameYRatio + (60 * frameYRatio) - 1));
+	movieSortDirection = new wxBitmapButton(movieFiltering, 4, scaleImage(wxBitmap("Resources/Gallery/UI/Sorting/Alpha - Ascending.png", wxBITMAP_TYPE_PNG), (int)(34 * frameXRatio + 0.5), (int)(34 * frameYRatio + 0.5)), wxPoint(headOffset * frameXRatio, offsetY * frameYRatio + (60 * frameYRatio) - 1));
 	movieSortChoice = new wxChoice(movieFiltering, 5, wxPoint(movieSortDirection->GetPosition().x + movieSortDirection->GetSize().GetWidth() + (1.0 / 2.0) * choiceOffset * frameXRatio, (offsetY * frameYRatio) + 60 * frameYRatio), wxDefaultSize, wxArrayString(5, columns));
 	movieSortChoice->SetSelection(0);
 	//Random
 	movieRandom->SetFont(headingFont);
-	movieTitle = new wxStaticText(movieRandom, wxID_ANY, "Blade Runner (1982)", wxPoint(30 * frameXRatio, 30 * frameYRatio));
+	movieTitle = new wxStaticText(movieRandom, wxID_ANY, "Blade Runner (1982) - 1hr 57 mins", wxPoint(30 * frameXRatio, 30 * frameYRatio));
 	movieTitle->SetFont(titleFont);
+	movieAge = new wxStaticBitmap(movieRandom, wxID_ANY, scaleImage(wxBitmap("Resources/Gallery/UI/BBFC/15.jpg", wxBITMAP_TYPE_JPEG), 75 * frameXRatio, 75 * frameYRatio), wxPoint(movieTitle->GetPosition().x + movieTitle->GetSize().GetWidth() + 25 * frameXRatio, movieTitle->GetPosition().y - 10 * frameYRatio));
 	moviePoster = new wxStaticBitmap(movieRandom, wxID_ANY, scaleImage(wxBitmap("Resources/Gallery/movies/Blade Runner/Cover.png", wxBITMAP_TYPE_PNG), 500 * frameXRatio, 700 * frameYRatio), wxPoint(10 * frameXRatio, 100 * frameYRatio));
 	movieDescHeader = new wxStaticText(movieRandom, wxID_ANY, "SUMMARY:", wxPoint(550 * frameXRatio, 120 * frameYRatio));
 	movieDesc = new wxStaticText(movieRandom, wxID_ANY, "In the film directed by Ridley Scott, Rick Deckard, an ex - policeman, becomes a special agent with a mission to exterminate a group of violent androids.\nAs he starts getting deeper into his mission, he questions his own identity.", wxPoint(550 * frameXRatio, 200 * frameYRatio));
@@ -714,10 +720,6 @@ cMain::cMain() : wxFrame(nullptr, wxID_ANY, "RECOMMENGINE", wxPoint(0, 0))
 	searchTypeNB->AddPage(movieFiltering, "FILTER");
 	searchTypeNB->AddPage(movieRandom, "RANDOM");
 	searchTypeNB->SetFont(NBfont);
-	mediaNB->AddPage(searchTypeNB, "MOVIES", true);
-	mediaNB->AddPage(new wxPanel(mediaNB, 2), "TV SHOWS");
-	mediaNB->AddPage(new wxPanel(mediaNB, 3), "GAMES");
-	mediaNB->SetFont(NBfont);
 
 	//Establish SQL connection
 	conn = mysql_init(0);

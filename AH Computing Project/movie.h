@@ -1,7 +1,7 @@
 class movie {
 public:
     /* <-----Class Variables----->*/
-    int movieID;
+    int movieID = 0;
     wxBitmap *cover = nullptr;
     std::string title = "";
     std::string director = "";
