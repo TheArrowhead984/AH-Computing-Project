@@ -13,23 +13,6 @@ public:
     std::string description = "";
 
     /* <-----Class Methods----->*/
-    //Default Constructor
-    movie() {
-        movieID = 0;
-        cover = nullptr;
-        title = "";
-        director = "";
-        releaseDate = 0;
-        ageRating = "";
-        duration = "";
-        for (int i = 0; i < 4; i++) {
-            features[i] = "";
-        }
-        for (int i = 0; i < 8; i++) {
-            styles[i] = "";
-        }
-        description = "";
-    }
     //Constructor
     movie(int id, wxBitmap *cvr, std::string tle, std::string dir, int relDte, std::string ageRat, std::string dur, std::string feats[], std::string stys[], std::string desc) {
         movieID = id;
@@ -48,3 +31,8 @@ public:
         description = desc;
     }
 };
+
+
+
+
+

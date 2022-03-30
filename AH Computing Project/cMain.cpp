@@ -18,7 +18,7 @@ wxEND_EVENT_TABLE()
 
 /* <------------------Define global variables------------------>*/
 
-//SQL stuff
+//SQL Variables
 int qstate;
 MYSQL *conn;
 MYSQL_ROW row;
@@ -405,8 +405,6 @@ void cMain::runFilterQuery(std::string mediaType, wxBitmapButton *mediaTypeCover
 		}
 	}
 
-
-
 	//Execute constructed query
 	qstate = mysql_query(conn, queryStr.c_str());
 	if (!qstate) //If query executes successfully
@@ -438,6 +436,7 @@ void cMain::runFilterQuery(std::string mediaType, wxBitmapButton *mediaTypeCover
 		//If the query runs successfully but doesn't return any results display a message to the user
 		else {
 			wxMessageBox("Hmmmm...It appears there are no " + mediaType + " that fit your filters", wxT("No Results, Unfortunately"));
+			return;
 		}
 
 		int currentMovie = 0;
@@ -724,6 +723,7 @@ cMain::cMain() : wxFrame(nullptr, wxID_ANY, "RECOMMENGINE", wxPoint(0, 0))
 	//Establish SQL connection
 	conn = mysql_init(0);
 	conn = mysql_real_connect(conn, "localhost", "root", "", "ah_recommengine_db", 3306, NULL, 0);
+
 	movieStyleCombo->SetSelection(0);
 	movieFeatureCombo->SetSelection(0);
 	movieAgeCombo->SetSelection(0);
